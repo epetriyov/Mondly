@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_main">
+
+    <View
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="52dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/btn_close"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="2dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_close"
+        app:layout_constraintBottom_toBottomOf="@id/toolbar"
+        app:layout_constraintStart_toStartOf="@id/toolbar"
+        app:layout_constraintTop_toTopOf="@id/toolbar" />
+
+    <TextView
+        android:id="@+id/label_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/white"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="@id/toolbar"
+        app:layout_constraintEnd_toEndOf="@id/toolbar"
+        app:layout_constraintStart_toStartOf="@id/toolbar"
+        app:layout_constraintTop_toTopOf="@id/toolbar"
+        tools:text="Restaurant" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_chat_bot"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+
+    <View
+        android:id="@+id/control_panel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:background="@drawable/bg_control_panel"
+        android:elevation="@dimen/control_panel_elevation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/panel_top_space" />
+
+    <Space
+        android:id="@+id/panel_top_space"
+        android:layout_width="0dp"
+        android:layout_height="10dp"
+        app:layout_constraintBottom_toTopOf="@id/label_suggestions"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/label_suggestions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:elevation="@dimen/control_panel_elevation"
+        android:text="@string/suggestions"
+        android:textColor="@color/white_80"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toTopOf="@id/first_suggestion"
+        app:layout_constraintStart_toStartOf="@id/control_panel" />
+
+    <include
+        android:id="@+id/first_suggestion"
+        layout="@layout/view_suggestion"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:elevation="@dimen/control_panel_elevation"
+        app:layout_constraintBottom_toTopOf="@id/second_suggestion"
+        app:layout_constraintEnd_toEndOf="@id/control_panel"
+        app:layout_constraintStart_toStartOf="@id/control_panel" />
+
+    <include
+        android:id="@+id/second_suggestion"
+        layout="@layout/view_suggestion"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:elevation="@dimen/control_panel_elevation"
+        app:layout_constraintBottom_toTopOf="@id/third_suggestion"
+        app:layout_constraintEnd_toEndOf="@id/control_panel"
+        app:layout_constraintStart_toStartOf="@id/control_panel" />
+
+    <include
+        android:id="@+id/third_suggestion"
+        layout="@layout/view_suggestion"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="2dp"
+        android:elevation="@dimen/control_panel_elevation"
+        app:layout_constraintBottom_toTopOf="@id/btn_more_options"
+        app:layout_constraintEnd_toEndOf="@id/control_panel"
+        app:layout_constraintStart_toStartOf="@id/control_panel" />
+
+    <ImageButton
+        android:id="@+id/btn_more_options"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:elevation="@dimen/control_panel_elevation"
+        android:src="@drawable/ic_more_options"
+        app:layout_constraintBottom_toTopOf="@id/btn_change_input_type"
+        app:layout_constraintEnd_toEndOf="@id/control_panel" />
+
+    <ImageButton
+        android:id="@+id/btn_change_input_type"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/bg_change_input_type"
+        android:elevation="@dimen/control_panel_elevation"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_keyboard"
+        app:layout_constraintBottom_toTopOf="@id/switch_auto_play"
+        app:layout_constraintEnd_toEndOf="@id/control_panel" />
+
+    <ImageButton
+        android:id="@+id/btn_microphone"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:background="@drawable/btn_microphone"
+        android:elevation="@dimen/control_panel_elevation"
+        android:src="@drawable/ic_microphone_2"
+        app:layout_constraintBottom_toBottomOf="@id/btn_change_input_type"
+        app:layout_constraintEnd_toEndOf="@id/control_panel"
+        app:layout_constraintStart_toStartOf="@id/control_panel" />
+
+    <View
+        android:id="@+id/container_edit_text"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:background="@drawable/bg_edit_text"
+        android:elevation="@dimen/control_panel_elevation"
+        app:layout_constraintBottom_toBottomOf="@id/btn_change_input_type"
+        app:layout_constraintEnd_toStartOf="@id/btn_change_input_type"
+        app:layout_constraintStart_toStartOf="@id/control_panel"
+        app:layout_constraintTop_toTopOf="@id/btn_change_input_type" />
+
+    <EditText
+        android:id="@+id/edit_answer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="18dp"
+        android:layout_marginEnd="10dp"
+        android:background="@null"
+        android:elevation="@dimen/control_panel_elevation"
+        android:hint="@string/hint_edit_answer"
+        android:textColor="@color/white_50"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="@id/container_edit_text"
+        app:layout_constraintEnd_toStartOf="@id/btn_send"
+        app:layout_constraintStart_toStartOf="@id/container_edit_text"
+        app:layout_constraintTop_toTopOf="@id/container_edit_text"
+        tools:text="@string/hint_edit_answer" />
+
+    <ImageButton
+        android:id="@+id/btn_send"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:elevation="@dimen/control_panel_elevation"
+        android:src="@drawable/ic_send"
+        app:layout_constraintBottom_toBottomOf="@id/container_edit_text"
+        app:layout_constraintEnd_toEndOf="@id/container_edit_text"
+        app:layout_constraintTop_toTopOf="@id/container_edit_text" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switch_auto_play"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:checked="true"
+        android:elevation="@dimen/control_panel_elevation"
+        android:text="@string/auto_play"
+        android:textColor="@android:color/white"
+        android:textSize="17sp"
+        app:layout_constraintBottom_toTopOf="@id/divider_switch"
+        app:layout_constraintEnd_toEndOf="@id/control_panel"
+        app:layout_constraintStart_toStartOf="@id/control_panel" />
+
+    <View
+        android:id="@+id/divider_switch"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:background="@color/black_10"
+        android:elevation="@dimen/control_panel_elevation"
+        app:layout_constraintBottom_toTopOf="@id/switch_translations"
+        app:layout_constraintEnd_toEndOf="@id/control_panel"
+        app:layout_constraintStart_toStartOf="@id/control_panel" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switch_translations"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:elevation="@dimen/control_panel_elevation"
+        android:text="@string/translations"
+        android:textColor="@android:color/white"
+        android:textSize="17sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/control_panel"
+        app:layout_constraintStart_toStartOf="@id/control_panel" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/options_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="switch_auto_play,divider_switch,switch_translations"
+        tools:visibility="visible" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/edit_text_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="container_edit_text,edit_answer,btn_send"
+        tools:visibility="visible" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

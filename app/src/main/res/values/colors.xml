@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#D81B60</color>
+    <color name="dusk_blue">#275191</color>
+    <color name="cool_blue">#3e84b9</color>
+    <color name="windows_blue">#4489c5</color>
+    <color name="flat_blue">#3666ac</color>
+    <color name="white">#ffffff</color>
+    <color name="black_15">#26000000</color>
+    <color name="black_10">#19000000</color>
+    <color name="black__20">#33000000</color>
+    <color name="greyish_brown">#484848</color>
+    <color name="turquoise_blue">#01a9b0</color>
+    <color name="black__25">#40000000</color>
+    <color name="black">#262626</color>
+    <color name="black__30">#4c000000</color>
+    <color name="white_50">#80ffffff</color>
+    <color name="dusk_blue_two">#285493</color>
+    <color name="turquoise_blue_50">#8001a9b0</color>
+    <color name="white_80">#80ffffff</color>
+</resources>
