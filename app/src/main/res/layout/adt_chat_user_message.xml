@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-
+    android:layout_height="wrap_content"
+    android:gravity="bottom"
+    android:orientation="horizontal">
 
     <LinearLayout
-        android:id="@+id/container_user_text"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_user_message"
         android:gravity="center_vertical"
@@ -16,24 +16,30 @@
         android:paddingStart="27dp"
         android:paddingTop="13dp"
         android:paddingEnd="18dp"
-        android:paddingBottom="13dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/img_user_avatar"
-        app:layout_constraintStart_toStartOf="parent">
+        android:paddingBottom="13dp">
 
         <TextView
-            android:id="@+id/text_message"
-            android:layout_width="match_parent"
+            android:id="@+id/text_user_message"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@android:color/white"
             android:textSize="21sp"
-            tools:text="¿Qué desea?" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/img_user_avatar"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="¿Qué desea? \uD83D\uDC69\u200D\uD83D\uDCBB" />
 
         <ImageView
-            android:id="@+id/img_emoji"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
+            android:id="@+id/img_message_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_marginStart="10dp" />
+
+        <ProgressBar
+            android:id="@+id/loader_user_message"
+            android:layout_width="48dp"
+            android:layout_height="48dp" />
+
     </LinearLayout>
 
 
@@ -46,4 +52,4 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

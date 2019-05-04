@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="control_panel_elevation">4dp</dimen>
+    <dimen name="chatbot_control_panel_elevation">4dp</dimen>
+    <dimen name="footer_height">285dp</dimen>
 </resources>

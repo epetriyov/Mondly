@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Mondly Chatbot</string>
-    <string name="suggestions">Things you can say:</string>
-    <string name="hint_edit_answer">Type here to reply</string>
-    <string name="auto_play">Autoplay</string>
-    <string name="translations">Translations</string>
+    <string name="chatbot_suggestions">Things you can say:</string>
+    <string name="chatbot_hint_edit_answer">Type here to reply</string>
+    <string name="chatbot_auto_play">Autoplay</string>
+    <string name="chatbot_translations">Translations</string>
 </resources>

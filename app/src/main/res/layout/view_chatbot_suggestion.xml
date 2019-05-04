@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:elevation="@dimen/chatbot_control_panel_elevation"
+    >
 
     <ImageView
         android:id="@+id/image_message"
@@ -59,13 +60,13 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <View
-        android:id="@+id/divider_switch"
+        android:id="@+id/divider_suggestions"
         android:layout_width="0dp"
         android:layout_height="2dp"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
         android:background="@color/black_10"
-        android:elevation="@dimen/control_panel_elevation"
+        android:elevation="@dimen/chatbot_control_panel_elevation"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
