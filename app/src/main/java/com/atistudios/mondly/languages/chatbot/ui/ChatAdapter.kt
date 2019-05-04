@@ -3,6 +3,8 @@ package com.atistudios.mondly.languages.chatbot.ui
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
+import androidx.core.view.ViewPropertyAnimatorListener
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
@@ -12,6 +14,7 @@ import com.atistudios.mondly.languages.chatbot.R
 import com.atistudios.mondly.languages.chatbot.entitites.ChatMessage
 import com.atistudios.mondly.languages.chatbot.ui.ChatAdapter.ItemViewType.*
 import com.atistudios.mondly.languages.chatbot.utilities.GlideApp
+import jp.wasabeef.recyclerview.animators.holder.AnimateViewHolder
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.adt_chat_bot_message.*
 import kotlinx.android.synthetic.main.adt_chat_user_message.*
@@ -90,7 +93,28 @@ class BotMessageViewHolder(containerView: View) : BaseViewHolder(containerView) 
 }
 
 
-class UserMessageViewHolder(containerView: View) : BaseViewHolder(containerView) {
+class UserMessageViewHolder(containerView: View) : BaseViewHolder(containerView), AnimateViewHolder {
+    override fun preAnimateAddImpl(holder: RecyclerView.ViewHolder) {
+        ViewCompat.setTranslationX(itemView, itemView.width * 1f)
+        ViewCompat.setAlpha(itemView, 0f)
+    }
+
+    override fun preAnimateRemoveImpl(holder: RecyclerView.ViewHolder?) {
+    }
+
+    override fun animateAddImpl(holder: RecyclerView.ViewHolder, listener: ViewPropertyAnimatorListener?) {
+        ViewCompat.animate(itemView).apply {
+            translationX(0f)
+            alpha(1f)
+            duration = 120
+            setListener(listener)
+        }.start()
+    }
+
+
+    override fun animateRemoveImpl(holder: RecyclerView.ViewHolder, listener: ViewPropertyAnimatorListener?) {
+    }
+
     fun bindView(item: ChatMessage.UserMessage) {
         img_message_icon.isInvisible = item.icon == null
         loader_user_message.isVisible = item.isSpeaking

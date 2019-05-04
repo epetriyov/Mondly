@@ -8,10 +8,12 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.atistudios.mondly.languages.chatbot.R
 import com.atistudios.mondly.languages.chatbot.entitites.ChatMessage
 import com.atistudios.mondly.languages.chatbot.entitites.ResponseSuggestion
 import com.atistudios.mondly.languages.chatbot.utilities.Speaker
+import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator
 import kotlinx.android.synthetic.main.activity_chatbot.*
 import java.util.*
 
@@ -47,6 +49,7 @@ class ChatBotActivity : AppCompatActivity() {
         setContentView(R.layout.activity_chatbot)
         chatAdapter = ChatAdapter()
         recycler_view_chat_bot.layoutManager = LinearLayoutManager(this)
+        recycler_view_chat_bot.itemAnimator = SlideInLeftAnimator()
         val dividerItemDecoration = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
             .apply { setDrawable(getDrawable(R.drawable.divider)) }
         recycler_view_chat_bot.addItemDecoration(dividerItemDecoration)
@@ -54,22 +57,40 @@ class ChatBotActivity : AppCompatActivity() {
         readIntent()
         checkTTS()
         fillAdapterWithMockData()
+        val mockData =
+            mutableListOf<ChatMessage>(ChatMessage.Footer(resources.getDimension(R.dimen.footer_height).toInt()))
+        var counter = 0
+        btn_microphone.setOnClickListener {
+            mockData.add(mockData.size - 1, getElement(counter))
+            chatAdapter.submitList(mockData.toMutableList())
+            counter++
+        }
+        chatAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                recycler_view_chat_bot.layoutManager!!.smoothScrollToPosition(
+                    recycler_view_chat_bot,
+                    null,
+                    chatAdapter.itemCount
+                )
+            }
+        })
+    }
+
+    private fun getElement(counter: Int): ChatMessage {
+        return when (counter) {
+            0 -> ChatMessage.BotMessage("Hola!", "привет", false)
+            1 -> ChatMessage.UserMessage("Hola U+1F600")
+            2 -> ChatMessage.BotMessage("Commo te lammas?", "как дела", false)
+            3 -> ChatMessage.UserMessage("John")
+            4 -> ChatMessage.BotMessage("Encantanda.", "приятно познакомиться", false)
+            5 -> ChatMessage.UserMessage("Hola, encantando de conocerte")
+            6 -> ChatMessage.BotMessage("Como estas?", "как дела?", false, showBotAvatar = false)
+            7 -> ChatMessage.BotMessage("Es un placer.", "рад слышать", false)
+            else -> ChatMessage.BotMessage("Hola!", "привет", false)
+        }
     }
 
     private fun fillAdapterWithMockData() {
-        val mockData = listOf(
-            ChatMessage.BotMessage("Hola!", "привет", true),
-            ChatMessage.UserMessage("Hola U+1F600"),
-            ChatMessage.BotMessage("Commo te lammas?", "как дела", false),
-            ChatMessage.UserMessage("John"),
-            ChatMessage.BotMessage("Encantanda.", "приятно познакомиться", false),
-            ChatMessage.UserMessage("Hola, encantando de conocerte"),
-            ChatMessage.BotMessage("Como estas?", "как дела?", false, showBotAvatar = false),
-            ChatMessage.BotMessage("Es un placer.", "рад слышать", false),
-            ChatMessage.Footer(resources.getDimension(R.dimen.footer_height).toInt())
-        )
-        chatAdapter.submitList(mockData)
-
         SuggestionViewBinder.bindView(
             first_suggestion as ViewGroup,
             ResponseSuggestion(null, "Encantanda", "приятно познакомиться")
