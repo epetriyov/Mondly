@@ -1,5 +1,7 @@
 package com.atistudios.mondly.languages.chatbot.ui
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,10 +21,11 @@ import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.adt_chat_bot_message.*
 import kotlinx.android.synthetic.main.adt_chat_user_message.*
 
+
 internal class ChatAdapter :
     ListAdapter<ChatMessage, BaseViewHolder>(object : DiffUtil.ItemCallback<ChatMessage>() {
         override fun areItemsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
-            return oldItem == newItem
+            return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
@@ -30,8 +33,17 @@ internal class ChatAdapter :
         }
     }) {
 
+    private var lastPosition = -1
+
+    private var areTranslationsVisible: Boolean = true
+
     enum class ItemViewType {
         BOT_MESSAGE_TYPE, USER_MESSAGE_TYPE, FOOTER_TYPE
+    }
+
+    fun setTranslationVisibility(isTranslationsVisible: Boolean) {
+        this.areTranslationsVisible = isTranslationsVisible
+        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
@@ -71,8 +83,38 @@ internal class ChatAdapter :
 
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
         when (holder) {
-            is BotMessageViewHolder -> holder.bindView(getItem(position) as ChatMessage.BotMessage)
-            is UserMessageViewHolder -> holder.bindView(getItem(position) as ChatMessage.UserMessage)
+            is BotMessageViewHolder -> {
+                val item = getItem(position) as ChatMessage.BotMessage
+                val animateText = if (!item.isLoading) {
+                    if (position > lastPosition) {
+                        lastPosition = position
+                        true
+                    } else {
+                        false
+                    }
+                } else {
+                    false
+                }
+                holder.bindView(
+                    item,
+                    areTranslationsVisible,
+                    animateText
+                )
+            }
+            is UserMessageViewHolder -> {
+                val item = getItem(position) as ChatMessage.UserMessage
+                val animateText = if (!item.isSpeaking) {
+                    if (position > lastPosition) {
+                        lastPosition = position
+                        true
+                    } else {
+                        false
+                    }
+                } else {
+                    false
+                }
+                holder.bindView(item, animateText)
+            }
             is FooterViewHolder -> holder.bindView(getItem(position) as ChatMessage.Footer)
         }
     }
@@ -82,12 +124,34 @@ sealed class BaseViewHolder(override val containerView: View) : RecyclerView.Vie
     LayoutContainer
 
 class BotMessageViewHolder(containerView: View) : BaseViewHolder(containerView) {
-    fun bindView(item: ChatMessage.BotMessage) {
+    fun bindView(item: ChatMessage.BotMessage, isTranslationsVisible: Boolean, showAnimated: Boolean) {
         text_message.text = item.text
         text_message_translation.text = item.translation
         img_bot_avatar.isInvisible = !item.showBotAvatar
         text_bot_messages.isVisible = !item.isLoading
+        text_message_translation.isVisible = !item.isLoading && isTranslationsVisible
         loader_bot_message.isVisible = item.isLoading
+        text_bot_messages.setOnClickListener {
+            val animX = ObjectAnimator.ofFloat(text_message, "scaleX", 2f)
+            val animY = ObjectAnimator.ofFloat(text_message, "scaleY", 2f)
+            val animRX = ObjectAnimator.ofFloat(text_message, "scaleX", 1f)
+            val animRY = ObjectAnimator.ofFloat(text_message, "scaleY", 1f)
+            AnimatorSet().apply {
+                play(animX).with(animY).before(animRX)
+                play(animRX).with(animRY)
+                duration = 240
+                start()
+            }
+        }
+        if (showAnimated) {
+            val animX = ObjectAnimator.ofFloat(text_message, "alpha", 0F, 1F)
+            val animY = ObjectAnimator.ofFloat(text_message_translation, "alpha", 0F, 1F)
+            AnimatorSet().apply {
+                play(animX).with(animY)
+                duration = 240
+                start()
+            }
+        }
 //        img_bot_avatar.setImageResource(-1)
     }
 }
@@ -115,7 +179,7 @@ class UserMessageViewHolder(containerView: View) : BaseViewHolder(containerView)
     override fun animateRemoveImpl(holder: RecyclerView.ViewHolder, listener: ViewPropertyAnimatorListener?) {
     }
 
-    fun bindView(item: ChatMessage.UserMessage) {
+    fun bindView(item: ChatMessage.UserMessage, animateText: Boolean) {
         img_message_icon.isInvisible = item.icon == null
         loader_user_message.isVisible = item.isSpeaking
         text_user_message.isVisible = !item.isSpeaking
@@ -133,6 +197,13 @@ class UserMessageViewHolder(containerView: View) : BaseViewHolder(containerView)
                 .into(img_user_avatar)
         } else {
             img_user_avatar.setImageBitmap(null)
+        }
+        if (animateText) {
+            ObjectAnimator.ofFloat(text_user_message, "alpha", 0F, 1F)
+                .apply {
+                    duration = 240
+                    start()
+                }
         }
     }
 }

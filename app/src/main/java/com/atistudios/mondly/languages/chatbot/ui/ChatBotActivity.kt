@@ -65,6 +65,19 @@ class ChatBotActivity : AppCompatActivity() {
             chatAdapter.submitList(mockData.toMutableList())
             counter++
         }
+        btn_more_options.setOnClickListener {
+            val list = mutableListOf(
+                ChatMessage.BotMessage("1", "Hola!", "привет", false),
+                ChatMessage.UserMessage("2", "Hola U+1F600", isSpeaking = false),
+                ChatMessage.Footer(resources.getDimension(R.dimen.footer_height).toInt())
+            )
+            chatAdapter.submitList(list)
+        }
+        var showTranslation = true
+        btn_close.setOnClickListener {
+            showTranslation = !showTranslation
+            chatAdapter.setTranslationVisibility(showTranslation)
+        }
         chatAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                 recycler_view_chat_bot.layoutManager!!.smoothScrollToPosition(
@@ -78,15 +91,15 @@ class ChatBotActivity : AppCompatActivity() {
 
     private fun getElement(counter: Int): ChatMessage {
         return when (counter) {
-            0 -> ChatMessage.BotMessage("Hola!", "привет", false)
-            1 -> ChatMessage.UserMessage("Hola U+1F600")
-            2 -> ChatMessage.BotMessage("Commo te lammas?", "как дела", false)
-            3 -> ChatMessage.UserMessage("John")
-            4 -> ChatMessage.BotMessage("Encantanda.", "приятно познакомиться", false)
-            5 -> ChatMessage.UserMessage("Hola, encantando de conocerte")
-            6 -> ChatMessage.BotMessage("Como estas?", "как дела?", false, showBotAvatar = false)
-            7 -> ChatMessage.BotMessage("Es un placer.", "рад слышать", false)
-            else -> ChatMessage.BotMessage("Hola!", "привет", false)
+            0 -> ChatMessage.BotMessage("1", "Hola!", "привет", true)
+            1 -> ChatMessage.UserMessage("2", "Hola U+1F600", isSpeaking = true)
+            2 -> ChatMessage.BotMessage("3", "Commo te lammas?", "как дела", false)
+            3 -> ChatMessage.UserMessage("4", "John")
+            4 -> ChatMessage.BotMessage("5", "Encantanda.", "приятно познакомиться", false)
+            5 -> ChatMessage.UserMessage("6", "Hola, encantando de conocerte")
+            6 -> ChatMessage.BotMessage("7", "Como estas?", "как дела?", false, showBotAvatar = false)
+            7 -> ChatMessage.BotMessage("8", "Es un placer.", "рад слышать", false)
+            else -> ChatMessage.BotMessage("9", "Hola!", "привет", false)
         }
     }
 

@@ -5,7 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="bottom"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:animateLayoutChanges="true"
+    >
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -35,10 +37,15 @@
             android:layout_height="40dp"
             android:layout_marginStart="10dp" />
 
-        <ProgressBar
+        <com.github.silvestrpredko.dotprogressbar.DotProgressBar
             android:id="@+id/loader_user_message"
-            android:layout_width="48dp"
-            android:layout_height="48dp" />
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            app:amount="3"
+            app:animationDirection="right"
+            app:duration="200"
+            app:endColor="@color/red_400"
+            app:startColor="@color/red_300" />
 
     </LinearLayout>
 
