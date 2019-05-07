@@ -94,46 +94,48 @@ class ChatBotActivity : AppCompatActivity() {
         })
         recycler_view_chat_bot.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (layoutManager.findFirstVisibleItemPosition() == 0 && !recycler_view_chat_bot.canScrollVertically(-1)) {
-                    toolbar.elevation = 0f
-                    toolbar.setBackgroundColor(
-                        ContextCompat.getColor(
-                            this@ChatBotActivity,
-                            android.R.color.transparent
+                if (recycler_view_chat_bot.canScrollVertically(1)) {
+                    if (layoutManager.findFirstVisibleItemPosition() == 0
+                        && !recycler_view_chat_bot.canScrollVertically(-1)
+                    ) {
+                        toolbar.elevation = 0f
+                        toolbar.setBackgroundColor(
+                            ContextCompat.getColor(
+                                this@ChatBotActivity,
+                                android.R.color.transparent
+                            )
                         )
-                    )
-                    hideBottomPanelAnimation()
-                    isRecyclerInTop = true
-                } else {
-                    toolbar.elevation = resources.getDimension(R.dimen.chatbot_control_panel_elevation)
-                    toolbar.setBackgroundColor(ContextCompat.getColor(this@ChatBotActivity, R.color.dusk_blue))
-                    showBottomPanelAnimation()
-                    isRecyclerInTop = false
+                        hideBottomPanelAnimation()
+                        isRecyclerInTop = true
+                    } else {
+                        toolbar.elevation = resources.getDimension(R.dimen.chatbot_control_panel_elevation)
+                        toolbar.setBackgroundColor(ContextCompat.getColor(this@ChatBotActivity, R.color.dusk_blue))
+                        showBottomPanelAnimation()
+                        isRecyclerInTop = false
+                    }
                 }
             }
         })
     }
 
     private fun hideBottomPanelAnimation() {
-        motion_layout.transitionToEnd()
-//        if (control_panel.translationY == 0F) {
-//            ObjectAnimator.ofFloat(switch_translations, "translationY", 0F, control_panel.height.toFloat())
-//                .apply {
-//                    duration = 250
-//                    start()
-//                }
-//        }
+        if (bottom_container.translationY == 0F) {
+            ObjectAnimator.ofFloat(bottom_container, "translationY", 0F, bottom_container.height.toFloat())
+                .apply {
+                    duration = 250
+                    start()
+                }
+        }
     }
 
     private fun showBottomPanelAnimation() {
-        motion_layout.transitionToStart()
-//        if (control_panel.translationY > 0F) {
-//            ObjectAnimator.ofFloat(switch_translations, "translationY", control_panel.height.toFloat(), 0F)
-//                .apply {
-//                    duration = 250
-//                    start()
-//                }
-//        }
+        if (bottom_container.translationY > 0F) {
+            ObjectAnimator.ofFloat(bottom_container, "translationY", bottom_container.height.toFloat(), 0F)
+                .apply {
+                    duration = 250
+                    start()
+                }
+        }
     }
 
     private fun getElement(counter: Int): ChatMessage {
