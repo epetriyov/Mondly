@@ -1,8 +1,18 @@
 package com.atistudios.mondly.languages.chatbot.ui
 
-import com.atistudios.mondly.languages.chatbot.entitites.ChatMessage
+import com.atistudios.mondly.languages.chatbot.entitites.ResponseSuggestion
 
-interface ChatBotView {
+interface BottomPanelView {
 
-    fun showMessage(chatMessage: ChatMessage)
+    fun init()
+
+    fun botMessageLoaded(suggestion: List<ResponseSuggestion>, isFirst: Boolean)
+
+    fun userMessageSent()
+
+    fun controlModeClicked()
+
+    fun optionsClicked()
+
+    fun translationEnableChanged(enabled: Boolean)
 }

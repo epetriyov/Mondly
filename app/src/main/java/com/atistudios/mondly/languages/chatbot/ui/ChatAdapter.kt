@@ -12,6 +12,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.TransitionManager
 import com.atistudios.mondly.languages.chatbot.R
 import com.atistudios.mondly.languages.chatbot.entitites.ChatMessage
 import com.atistudios.mondly.languages.chatbot.ui.ChatAdapter.ItemViewType.*
@@ -125,6 +126,7 @@ sealed class BaseViewHolder(override val containerView: View) : RecyclerView.Vie
 
 class BotMessageViewHolder(containerView: View) : BaseViewHolder(containerView) {
     fun bindView(item: ChatMessage.BotMessage, isTranslationsVisible: Boolean, showAnimated: Boolean) {
+        TransitionManager.beginDelayedTransition(itemView as ViewGroup)
         text_message.text = item.text
         text_message_translation.text = item.translation
         img_bot_avatar.isInvisible = !item.showBotAvatar
