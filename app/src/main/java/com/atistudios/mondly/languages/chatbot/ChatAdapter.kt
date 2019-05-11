@@ -12,8 +12,8 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.atistudios.mondly.languages.chatbot.utils.GlideApp
 import com.atistudios.mondly.languages.chatbot.utils.scaleAnimation
+import com.bumptech.glide.Glide
 import jp.wasabeef.recyclerview.animators.holder.AnimateViewHolder
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.adt_chat_bot_message.*
@@ -140,14 +140,14 @@ sealed class BaseViewHolder(override val containerView: View) : RecyclerView.Vie
             text_user_message.isVisible = !item.isSpeaking
             text_user_message.text = item.text
             if (item.icon != null) {
-                GlideApp.with(containerView)
+                Glide.with(containerView)
                     .load(item.icon)
                     .into(img_message_icon)
             } else {
                 img_message_icon.setImageBitmap(null)
             }
             if (item.avatarUrl != null) {
-                GlideApp.with(containerView)
+                Glide.with(containerView)
                     .load(item.avatarUrl)
                     .into(img_user_avatar)
             } else {
