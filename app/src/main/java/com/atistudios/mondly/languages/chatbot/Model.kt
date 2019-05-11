@@ -9,6 +9,7 @@ sealed class ChatMessage(open val id: String? = null) {
         val text: String?,
         val translation: String?,
         val isLoading: Boolean,
+        val showTranslation: Boolean = true,
         val showBotAvatar: Boolean = true
     ) : ChatMessage(id)
 
@@ -23,4 +24,4 @@ sealed class ChatMessage(open val id: String? = null) {
     data class Footer(val height: Int) : ChatMessage()
 }
 
-data class ResponseSuggestion(@DrawableRes val icon: Int?, val text: String, val translation: String)
+data class ResponseSuggestion(val text: String, val translation: String, @DrawableRes val icon: Int? = null)

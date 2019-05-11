@@ -1,5 +1,6 @@
 package com.atistudios.mondly.languages.chatbot
 
+import android.annotation.SuppressLint
 import android.transition.TransitionManager
 import android.view.LayoutInflater
 import android.view.View
@@ -33,19 +34,13 @@ internal class ChatAdapter(private val botMessageClickListener: ((message: Strin
                 return oldItem.id == newItem.id
             }
 
+            @SuppressLint("DiffUtilEquals")
             override fun areContentsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
                 return oldItem == newItem
             }
         }) {
 
     private var lastPosition = -1
-
-    private var areTranslationsVisible: Boolean = true
-
-    fun setTranslationVisibility(isTranslationsVisible: Boolean) {
-        this.areTranslationsVisible = isTranslationsVisible
-        notifyDataSetChanged()
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -78,7 +73,7 @@ internal class ChatAdapter(private val botMessageClickListener: ((message: Strin
                 if (animateText) {
                     lastPosition = position
                 }
-                holder.bindView(item, areTranslationsVisible, animateText)
+                holder.bindView(item, animateText)
             }
             is BaseViewHolder.UserMessageViewHolder -> {
                 val item = getItem(position) as ChatMessage.UserMessage
@@ -98,7 +93,7 @@ sealed class BaseViewHolder(override val containerView: View) : RecyclerView.Vie
 
     class BotMessageViewHolder(containerView: View, private val botMessageClickListener: (message: String) -> Unit?) :
         BaseViewHolder(containerView) {
-        fun bindView(item: ChatMessage.BotMessage, isTranslationVisible: Boolean, showAnimated: Boolean) {
+        fun bindView(item: ChatMessage.BotMessage, showAnimated: Boolean) {
             if (showAnimated) {
                 text_message.isVisible = false
                 text_message_translation.isVisible = false
@@ -109,7 +104,7 @@ sealed class BaseViewHolder(override val containerView: View) : RecyclerView.Vie
             img_bot_avatar.isInvisible = !item.showBotAvatar
             loader_bot_message.isVisible = item.isLoading
             text_message.isVisible = !item.isLoading
-            text_message_translation.isVisible = !item.isLoading && isTranslationVisible
+            text_message_translation.isVisible = !item.isLoading && item.showTranslation
             text_bot_messages.setOnClickListener {
                 if (!item.text.isNullOrEmpty()) {
                     text_bot_messages.scaleAnimation(TEXT_SCALE_FACTOR, TEXT_SCALE_DURATION)

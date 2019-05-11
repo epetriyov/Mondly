@@ -3,9 +3,10 @@ package com.atistudios.mondly.languages.chatbot
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.speech.tts.TextToSpeech
+import android.os.Handler
 import android.transition.*
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
@@ -15,24 +16,29 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.atistudios.mondly.languages.chatbot.utils.Speaker
+import com.atistudios.mondly.languages.chatbot.utils.TransitionEndListener
 import com.atistudios.mondly.languages.chatbot.utils.scaleAnimation
 import com.atistudios.mondly.languages.chatbot.utils.slideDown
 import com.atistudios.mondly.languages.chatbot.utils.slideUp
 import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator
 import kotlinx.android.synthetic.main.activity_chat.*
+import net.gotev.speech.Speech
+import net.gotev.speech.SpeechDelegate
 import java.util.*
 
 internal interface ChatView {
 
     fun suggestionsLoaded(
-        suggestions: Triple<ResponseSuggestion, ResponseSuggestion, ResponseSuggestion>,
-        introAnimations: Boolean
+        suggestions: Triple<ResponseSuggestion, ResponseSuggestion, ResponseSuggestion>, introAnimations: Boolean
     )
 
     fun botMessageLoading()
 
     fun chatUpdated(messages: List<ChatMessage>)
+
+    fun progressStateChanged(isLoading: Boolean)
+
+    fun speak(message: String)
 }
 
 class ChatBotActivity : AppCompatActivity(), ChatView {
@@ -41,7 +47,6 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
 
         private val EXTRA_CHATBOT_LANGUAGE = "extra_chatbot_language"
         private val EXTRA_CHATBOT_TITLE = "extra_chatbot_title"
-        private val TTS_RESULT_CODE = 89
 
         private const val BOTTOM_PANEL_SLIDE_DURATION = 250L
         private const val MICROPHONE_SCALE_DURATION = 250L
@@ -60,21 +65,20 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
 
     private lateinit var chatAdapter: ChatAdapter
 
-    private var speaker: Speaker? = null
-
     private lateinit var chatEngine: ChatEngine
-
-    private lateinit var chatLanguage: Locale
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
-        chatLanguage = (intent.getSerializableExtra(EXTRA_CHATBOT_LANGUAGE) as? Locale) ?: Locale.getDefault()
-        chatEngine = ChatEngineImpl(this, chatLanguage)
+        val chatLanguage = (intent.getSerializableExtra(EXTRA_CHATBOT_LANGUAGE) as? Locale) ?: Locale.getDefault()
+        Speech.init(this, packageName).apply {
+            setLocale(chatLanguage)
+        }
+        chatEngine = ChatEngineImpl(this, ChatListHelperImpl(), Handler())
         label_title.text = intent.getStringExtra(EXTRA_CHATBOT_TITLE)
         btn_close.setOnClickListener { finish() }
         chatAdapter = ChatAdapter {
-            speaker?.speak(it)
+            speak(it)
         }
         initRecyclerView()
         chatAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
@@ -87,31 +91,28 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             }
         })
         initBottomPanel()
-        btn_microphone.setOnClickListener { microphoneClicked() }
+        btn_microphone.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> speakStarted()
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> speakFinished()
+                else -> {
+                }
+            }
+            true
+        }
+        btn_send.setOnClickListener { chatEngine.onUserAnswered(edit_answer.text.toString()) }
         btn_more_options.setOnClickListener {
             TransitionManager.beginDelayedTransition(bottom_container)
             options_group.isVisible = !options_group.isVisible
         }
         btn_change_input_type.setOnClickListener { controlModeClicked() }
         switch_translations.setOnCheckedChangeListener { _, isChecked -> translationsVisibilityChanged(isChecked) }
-        checkTTS()
         chatEngine.onChatOpened()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == TTS_RESULT_CODE) {
-            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
-                speaker = Speaker(this, chatLanguage)
-            } else {
-                startActivity(Intent().apply { action = TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA; })
-            }
-        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        speaker?.destroy()
+        Speech.getInstance().shutdown()
     }
 
     override fun chatUpdated(messages: List<ChatMessage>) {
@@ -141,6 +142,15 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         setControlsEnabled(false)
         suggestions_group.isInvisible = true
     }
+
+    override fun progressStateChanged(isLoading: Boolean) {
+        progressBar.isInvisible = !isLoading
+    }
+
+    override fun speak(message: String) {
+        Speech.getInstance().say(message)
+    }
+
 
     private fun initRecyclerView() {
         recycler_view_chat_bot.apply {
@@ -175,6 +185,8 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         edit_text_group.isVisible = false
         options_group.isVisible = false
         setControlsEnabled(false)
+        img_pulse_microphone.alpha = ALPHA_CONTROLS_DISABLED
+        pulsator.isInvisible = true
     }
 
     private fun setControlsEnabled(enabled: Boolean) {
@@ -185,14 +197,34 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         btn_send.alpha = alpha
     }
 
-    private fun checkTTS() {
-        val check = Intent()
-        check.action = TextToSpeech.Engine.ACTION_CHECK_TTS_DATA
-        startActivityForResult(check, TTS_RESULT_CODE)
+    private fun speakStarted() {
+        TransitionManager.beginDelayedTransition(bottom_container)
+        btn_microphone.isInvisible = true
+        pulsator.isInvisible = false
+        Speech.getInstance().startListening(object : SpeechDelegate {
+            override fun onStartOfSpeech() {
+            }
+
+            override fun onSpeechPartialResults(results: MutableList<String>?) {
+            }
+
+            override fun onSpeechRmsChanged(value: Float) {
+            }
+
+            override fun onSpeechResult(result: String?) {
+                chatEngine.onUserAnswered(result)
+            }
+        })
+        chatEngine.onUserSpeakStarted()
+        pulsator.start()
     }
 
-    private fun microphoneClicked() {
-        //todo show micro animation
+    private fun speakFinished() {
+        TransitionManager.beginDelayedTransition(bottom_container)
+        pulsator.isInvisible = true
+        btn_microphone.isInvisible = false
+        Speech.getInstance().stopListening()
+        pulsator.stop()
     }
 
     private fun controlModeClicked() {
@@ -205,7 +237,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     }
 
     private fun translationsVisibilityChanged(areTranslationsVisible: Boolean) {
-        chatAdapter.setTranslationVisibility(areTranslationsVisible)
+        chatEngine.onTranslationsVisibilityChanged(areTranslationsVisible)
         TransitionManager.beginDelayedTransition(bottom_container as ViewGroup)
         first_suggestion.findViewById<View>(R.id.text_translation).isVisible = areTranslationsVisible
         second_suggestion.findViewById<View>(R.id.text_translation).isVisible = areTranslationsVisible
@@ -238,7 +270,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             transitionEndListener?.let { addListener(it) }
         })
         SuggestionViewBinder.bindView(first_suggestion as ViewGroup, suggestion) {
-            speaker?.speak(suggestion.text)
+            speak(suggestion.text)
         }
         first_suggestion.visibility = View.VISIBLE
     }

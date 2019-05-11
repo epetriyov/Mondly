@@ -1,4 +1,4 @@
-package com.atistudios.mondly.languages.chatbot
+package com.atistudios.mondly.languages.chatbot.utils
 
 import android.transition.Transition
 
