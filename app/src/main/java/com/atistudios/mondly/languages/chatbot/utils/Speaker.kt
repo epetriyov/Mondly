@@ -1,4 +1,4 @@
-package com.atistudios.mondly.languages.chatbot.utilities
+package com.atistudios.mondly.languages.chatbot.utils
 
 import android.content.Context
 import android.media.AudioManager
@@ -15,8 +15,6 @@ internal class Speaker(context: Context, private val language: Locale) : OnInitL
 
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
-            // Change this to match your
-            // locale
             tts.language = language
             ready = true
         } else {

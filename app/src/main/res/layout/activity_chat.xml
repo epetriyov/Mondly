@@ -52,14 +52,13 @@
         android:id="@+id/bottom_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
         android:background="@drawable/bg_control_panel"
         android:elevation="@dimen/chatbot_control_panel_elevation"
-        >
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <Space
             android:id="@+id/panel_top_space"
@@ -83,7 +82,7 @@
 
         <include
             android:id="@+id/first_suggestion"
-            layout="@layout/view_chatbot_suggestion"
+            layout="@layout/view_chat_suggestion"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toTopOf="@id/second_suggestion"
@@ -92,7 +91,7 @@
 
         <include
             android:id="@+id/second_suggestion"
-            layout="@layout/view_chatbot_suggestion"
+            layout="@layout/view_chat_suggestion"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toTopOf="@id/third_suggestion"
@@ -101,7 +100,7 @@
 
         <include
             android:id="@+id/third_suggestion"
-            layout="@layout/view_chatbot_suggestion"
+            layout="@layout/view_chat_suggestion"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="2dp"
@@ -186,7 +185,7 @@
             app:layout_constraintEnd_toEndOf="@id/container_edit_text"
             app:layout_constraintTop_toTopOf="@id/container_edit_text" />
 
-        <androidx.appcompat.widget.SwitchCompat
+        <Switch
             android:id="@+id/switch_auto_play"
             android:layout_width="0dp"
             android:layout_height="48dp"
@@ -213,7 +212,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <androidx.appcompat.widget.SwitchCompat
+        <Switch
             android:id="@+id/switch_translations"
             android:layout_width="0dp"
             android:layout_height="48dp"
@@ -226,6 +225,14 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/suggestions_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:constraint_referenced_ids="first_suggestion,second_suggestion,third_suggestion"
+            tools:visibility="visible" />
 
         <androidx.constraintlayout.widget.Group
             android:id="@+id/options_group"

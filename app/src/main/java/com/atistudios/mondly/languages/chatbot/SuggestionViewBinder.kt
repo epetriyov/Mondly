@@ -1,13 +1,11 @@
-package com.atistudios.mondly.languages.chatbot.ui
+package com.atistudios.mondly.languages.chatbot
 
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import com.atistudios.mondly.languages.chatbot.R
-import com.atistudios.mondly.languages.chatbot.entitites.ResponseSuggestion
 
-object SuggestionViewBinder {
+internal object SuggestionViewBinder {
 
     fun bindView(viewGroup: ViewGroup, suggestion: ResponseSuggestion, playbackClickListener: () -> Unit) {
         viewGroup.findViewById<ImageView>(R.id.image_message).apply {

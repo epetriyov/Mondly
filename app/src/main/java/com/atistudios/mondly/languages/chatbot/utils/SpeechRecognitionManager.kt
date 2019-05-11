@@ -1,4 +1,4 @@
-package com.atistudios.mondly.languages.chatbot.utilities
+package com.atistudios.mondly.languages.chatbot.utils
 
 import android.content.Context
 import android.content.Intent

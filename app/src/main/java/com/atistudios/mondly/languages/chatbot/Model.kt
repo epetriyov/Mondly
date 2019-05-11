@@ -1,8 +1,8 @@
-package com.atistudios.mondly.languages.chatbot.entitites
+package com.atistudios.mondly.languages.chatbot
 
 import androidx.annotation.DrawableRes
 
-sealed class ChatMessage(open val id: String) {
+sealed class ChatMessage(open val id: String? = null) {
 
     data class BotMessage(
         override val id: String,
@@ -20,5 +20,7 @@ sealed class ChatMessage(open val id: String) {
         val isSpeaking: Boolean = false
     ) : ChatMessage(id)
 
-    data class Footer(val height: Int) : ChatMessage("-1")
+    data class Footer(val height: Int) : ChatMessage()
 }
+
+data class ResponseSuggestion(@DrawableRes val icon: Int?, val text: String, val translation: String)
