@@ -99,15 +99,8 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             }
         })
         initBottomPanel()
-        btn_microphone.setOnTouchListener { _, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> checkPermission()
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> speakFinished()
-                else -> {
-                    //do nothing
-                }
-            }
-            true
+        btn_microphone.setOnClickListener {
+            checkPermission()
         }
         btn_send.setOnClickListener {
             chatEngine.onUserAnswered(edit_answer.text.toString(), true)
