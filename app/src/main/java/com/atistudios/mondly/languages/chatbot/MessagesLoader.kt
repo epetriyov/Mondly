@@ -15,12 +15,15 @@ class MockMessagesLoader : MessagesLoader {
         if (isTyped) {
             messageCounter++
         }
-        return ChatMessage.UserMessage(messageCounter.toString(), message)
+        return ChatMessage.UserMessage(messageCounter.toString(), message, icon = R.drawable.ic_emoji)
     }
 
     override fun buildLoadingTestUserMessage(): ChatMessage.UserMessage {
         messageCounter++
-        return ChatMessage.UserMessage(messageCounter.toString(), isSpeaking = true)
+        return ChatMessage.UserMessage(
+            messageCounter.toString(),
+            isSpeaking = true
+        )
     }
 
     override fun buildTestBotMessage(): ChatMessage.BotMessage {
@@ -30,9 +33,9 @@ class MockMessagesLoader : MessagesLoader {
 
     override fun buildTestSuggestions(): Triple<ResponseSuggestion, ResponseSuggestion, ResponseSuggestion> {
         return Triple(
-            ResponseSuggestion("test", "test"),
-            ResponseSuggestion("test2", "test2"),
-            ResponseSuggestion("test3", "test3")
+            ResponseSuggestion("test", "test", R.drawable.ic_emoji),
+            ResponseSuggestion("test2", "test2", R.drawable.ic_emoji),
+            ResponseSuggestion("test3", "test3", R.drawable.ic_emoji)
         )
     }
 }

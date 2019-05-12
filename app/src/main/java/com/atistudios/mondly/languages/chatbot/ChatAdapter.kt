@@ -97,6 +97,8 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
                     botMessageClickListener.invoke(item.text)
                 }
             }
+            //todo replace with real icon
+            img_bot_avatar.setImageResource(R.drawable.ic_emoji)
         }
     }
 
@@ -127,8 +129,8 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
         override fun animateRemoveImpl(holder: RecyclerView.ViewHolder, listener: ViewPropertyAnimatorListener?) {}
 
         fun bindView(item: ChatMessage.UserMessage) {
-            img_message_icon.isVisible = item.icon != null
-            if (item.icon != null) {
+            img_message_icon.isVisible = item.icon != null && !item.isSpeaking
+            if (item.icon != null && !item.isSpeaking) {
                 Glide.with(containerView)
                     .load(item.icon)
                     .into(img_message_icon)
@@ -139,13 +141,16 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
             loader_user_message.isVisible = item.isSpeaking
             text_user_message.isVisible = !item.isSpeaking
             text_user_message.text = item.text
-            if (item.avatarUrl != null) {
-                Glide.with(containerView)
-                    .load(item.avatarUrl)
-                    .into(img_user_avatar)
-            } else {
-                img_user_avatar.setImageBitmap(null)
-            }
+
+            //todo remove this line and uncomment next one for loading the real avatar
+            img_user_avatar.setImageResource(R.drawable.ic_avatar)
+//            if (item.avatarUrl != null) {
+//                Glide.with(containerView)
+//                    .load(item.avatarUrl)
+//                    .into(img_user_avatar)
+//            } else {
+//                img_user_avatar.setImageBitmap(null)
+//            }
         }
     }
 
