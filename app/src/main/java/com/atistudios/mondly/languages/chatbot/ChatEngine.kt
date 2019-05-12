@@ -74,6 +74,11 @@ internal class ChatEngineImpl(
         }, 2000L)
         handler.postDelayed({
             chatListHelper.updateLastItem(botMessage.copy(isLoading = false))
+            if (isAutoPlayEnabled) {
+                botMessage.text?.let {
+                    chatView.speak(it)
+                }
+            }
         }, 3000L)
         handler.postDelayed({
             chatView.suggestionsLoaded(buildTestSuggestions(), introAnimations)

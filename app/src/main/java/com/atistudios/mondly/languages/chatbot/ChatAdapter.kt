@@ -68,20 +68,10 @@ internal class ChatAdapter(private val botMessageClickListener: ((message: Strin
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
         when (holder) {
             is BaseViewHolder.BotMessageViewHolder -> {
-                val item = getItem(position) as ChatMessage.BotMessage
-                val animateText = !item.isLoading && position > lastPosition
-                if (animateText) {
-                    lastPosition = position
-                }
-                holder.bindView(item, animateText)
+                holder.bindView(getItem(position) as ChatMessage.BotMessage)
             }
             is BaseViewHolder.UserMessageViewHolder -> {
-                val item = getItem(position) as ChatMessage.UserMessage
-                val animateText = !item.isSpeaking && position > lastPosition
-                if (animateText) {
-                    lastPosition = position
-                }
-                holder.bindView(item, animateText)
+                holder.bindView(getItem(position) as ChatMessage.UserMessage)
             }
             is BaseViewHolder.FooterViewHolder -> holder.bindView(getItem(position) as ChatMessage.Footer)
         }
@@ -93,12 +83,8 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
 
     class BotMessageViewHolder(containerView: View, private val botMessageClickListener: (message: String) -> Unit?) :
         BaseViewHolder(containerView) {
-        fun bindView(item: ChatMessage.BotMessage, showAnimated: Boolean) {
-            if (showAnimated) {
-                text_message.isVisible = false
-                text_message_translation.isVisible = false
-            }
-            TransitionManager.beginDelayedTransition(itemView as ViewGroup)
+        fun bindView(item: ChatMessage.BotMessage) {
+            TransitionManager.beginDelayedTransition(container_message)
             text_message.text = item.text
             text_message_translation.text = item.translation
             img_bot_avatar.isInvisible = !item.showBotAvatar
@@ -134,11 +120,8 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
 
         override fun animateRemoveImpl(holder: RecyclerView.ViewHolder, listener: ViewPropertyAnimatorListener?) {}
 
-        fun bindView(item: ChatMessage.UserMessage, animateText: Boolean) {
+        fun bindView(item: ChatMessage.UserMessage) {
             img_message_icon.isInvisible = item.icon == null
-            loader_user_message.isVisible = item.isSpeaking
-            text_user_message.isVisible = !item.isSpeaking
-            text_user_message.text = item.text
             if (item.icon != null) {
                 Glide.with(containerView)
                     .load(item.icon)
@@ -146,17 +129,16 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
             } else {
                 img_message_icon.setImageBitmap(null)
             }
+            TransitionManager.beginDelayedTransition(user_message_container)
+            loader_user_message.isVisible = item.isSpeaking
+            text_user_message.isVisible = !item.isSpeaking
+            text_user_message.text = item.text
             if (item.avatarUrl != null) {
                 Glide.with(containerView)
                     .load(item.avatarUrl)
                     .into(img_user_avatar)
             } else {
                 img_user_avatar.setImageBitmap(null)
-            }
-            if (animateText) {
-                text_user_message.isVisible = false
-                TransitionManager.beginDelayedTransition(itemView as ViewGroup)
-                text_user_message.isVisible = true
             }
         }
     }

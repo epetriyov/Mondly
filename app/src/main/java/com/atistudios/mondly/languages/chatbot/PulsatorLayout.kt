@@ -13,6 +13,10 @@ import android.view.animation.*
 import android.widget.RelativeLayout
 import java.util.*
 
+/***
+ * fork from here https://github.com/booncol/Pulsator4Droid
+ * changed scaling type
+ */
 class PulsatorLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
     RelativeLayout(context, attrs, defStyleAttr) {
 

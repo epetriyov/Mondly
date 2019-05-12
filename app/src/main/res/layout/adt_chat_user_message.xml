@@ -1,24 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="bottom"
-    android:orientation="horizontal"
-    android:animateLayoutChanges="true"
-    >
+    android:animateLayoutChanges="true">
 
     <LinearLayout
+        android:id="@+id/user_message_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
         android:background="@drawable/bg_user_message"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="27dp"
         android:paddingTop="13dp"
         android:paddingEnd="18dp"
-        android:paddingBottom="13dp">
+        android:paddingBottom="13dp"
+        app:layout_constraintEnd_toStartOf="@id/img_user_avatar"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/text_user_message"
@@ -35,7 +39,9 @@
             android:id="@+id/img_message_icon"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginStart="10dp" />
+            android:layout_marginStart="10dp"
+            tools:visibility="gone"
+            />
 
         <com.github.silvestrpredko.dotprogressbar.DotProgressBar
             android:id="@+id/loader_user_message"
@@ -49,14 +55,12 @@
 
     </LinearLayout>
 
-
     <ImageView
         android:id="@+id/img_user_avatar"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/user_message_container"
         app:layout_constraintEnd_toEndOf="parent" />
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
