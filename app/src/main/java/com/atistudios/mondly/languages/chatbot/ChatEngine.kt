@@ -38,7 +38,7 @@ internal class ChatEngineImpl(
     }
 
     override fun onUserAnswered(message: String?, isTyped: Boolean) {
-        val userMessage = buildTestUserMessage(message)
+        val userMessage = buildTestUserMessage(message, isTyped)
         if (isTyped) {
             chatListHelper.addItem(userMessage)
         } else {
@@ -85,7 +85,10 @@ internal class ChatEngineImpl(
         }, 4000L)
     }
 
-    private fun buildTestUserMessage(message: String?): ChatMessage.UserMessage {
+    private fun buildTestUserMessage(message: String?, isTyped: Boolean): ChatMessage.UserMessage {
+        if (isTyped) {
+            messageCounter++
+        }
         return ChatMessage.UserMessage(messageCounter.toString(), message)
     }
 

@@ -104,6 +104,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                 MotionEvent.ACTION_DOWN -> checkPermission()
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> speakFinished()
                 else -> {
+                    //do nothing
                 }
             }
             true

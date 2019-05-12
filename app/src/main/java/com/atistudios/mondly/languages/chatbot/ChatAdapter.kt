@@ -40,8 +40,6 @@ internal class ChatAdapter(private val botMessageClickListener: ((message: Strin
         BOT_MESSAGE_TYPE, USER_MESSAGE_TYPE, FOOTER_TYPE
     }
 
-    private var lastPosition = -1
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
         return when (ItemViewType.values()[viewType]) {
@@ -103,14 +101,14 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
 
     class UserMessageViewHolder(containerView: View) : BaseViewHolder(containerView), AnimateViewHolder {
         override fun preAnimateAddImpl(holder: RecyclerView.ViewHolder) {
-            itemView.translationX = itemView.width.toFloat()
-            itemView.alpha = 0F
+            holder.itemView.translationX = itemView.width.toFloat()
+            holder.itemView.alpha = 0F
         }
 
         override fun preAnimateRemoveImpl(holder: RecyclerView.ViewHolder?) {}
 
         override fun animateAddImpl(holder: RecyclerView.ViewHolder, listener: ViewPropertyAnimatorListener?) {
-            ViewCompat.animate(itemView).apply {
+            ViewCompat.animate(holder.itemView).apply {
                 translationX(0F)
                 alpha(1F)
                 duration = ITEM_SLIDE_DURATION
