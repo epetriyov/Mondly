@@ -324,9 +324,9 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     private fun translationsVisibilityChanged(areTranslationsVisible: Boolean) {
         chatEngine.onTranslationsVisibilityChanged(areTranslationsVisible)
         TransitionManager.beginDelayedTransition(bottom_container as ViewGroup)
-        first_suggestion.findViewById<View>(R.id.text_translation).isVisible = areTranslationsVisible
-        second_suggestion.findViewById<View>(R.id.text_translation).isVisible = areTranslationsVisible
-        third_suggestion.findViewById<View>(R.id.text_translation).isVisible = areTranslationsVisible
+        first_suggestion.findViewById<View>(R.id.translation_suggestion).isVisible = areTranslationsVisible
+        second_suggestion.findViewById<View>(R.id.translation_suggestion).isVisible = areTranslationsVisible
+        third_suggestion.findViewById<View>(R.id.translation_suggestion).isVisible = areTranslationsVisible
     }
 
     private fun showSuggestions(

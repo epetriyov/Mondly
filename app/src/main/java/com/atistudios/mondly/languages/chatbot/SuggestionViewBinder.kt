@@ -13,10 +13,10 @@ internal object SuggestionViewBinder {
                 setImageResource(suggestion.icon)
             }
         }
-        viewGroup.findViewById<TextView>(R.id.text_message).apply {
+        viewGroup.findViewById<TextView>(R.id.text_suggestion).apply {
             text = suggestion.text
         }
-        viewGroup.findViewById<TextView>(R.id.text_translation).apply {
+        viewGroup.findViewById<TextView>(R.id.translation_suggestion).apply {
             text = suggestion.translation
         }
         viewGroup.findViewById<View>(R.id.btn_playback).apply {
