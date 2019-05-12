@@ -15,21 +15,28 @@ internal interface ChatEngine {
     fun onAutoPlayModeChanged(isAutoPlayEnabled: Boolean)
 
     fun onFooterHeightChanged(footerHeight: Int)
+
+    fun onDestroy()
 }
 
 internal class ChatEngineImpl(
     private val chatView: ChatView,
     private val chatListHelper: ChatListHelper,
+    private val messagesLoader: MessagesLoader,
     private val handler: Handler
 ) : ChatEngine {
+
+    companion object {
+        private const val BOT_MESSAGE_LOADING_DELAY = 2000L
+        private const val BOT_MESSAGE_CONTENT_LOADING_DELAY = 3000L
+        private const val SUGGESTIONS_LOADING_DELAY = 4000L
+    }
 
     init {
         chatListHelper.setListUpdatedListener {
             chatView.chatUpdated(it)
         }
     }
-
-    private var messageCounter = 0
 
     private var isAutoPlayEnabled = true
 
@@ -38,7 +45,7 @@ internal class ChatEngineImpl(
     }
 
     override fun onUserAnswered(message: String?, isTyped: Boolean) {
-        val userMessage = buildTestUserMessage(message, isTyped)
+        val userMessage = messagesLoader.buildTestUserMessage(message, isTyped)
         if (isTyped) {
             chatListHelper.addItem(userMessage)
         } else {
@@ -49,7 +56,7 @@ internal class ChatEngineImpl(
     }
 
     override fun onUserSpeakStarted() {
-        chatListHelper.addItem(buildLoadingTestUserMessage())
+        chatListHelper.addItem(messagesLoader.buildLoadingTestUserMessage())
     }
 
     override fun onTranslationsVisibilityChanged(areTranslationsVisible: Boolean) {
@@ -64,14 +71,17 @@ internal class ChatEngineImpl(
         chatListHelper.setFooterHeight(footerHeight)
     }
 
+    override fun onDestroy() {
+        handler.removeCallbacksAndMessages(null)
+    }
 
     private fun loadBotMessage(introAnimations: Boolean) {
         chatView.progressStateChanged(true)
-        val botMessage = buildTestBotMessage()
+        val botMessage = messagesLoader.buildTestBotMessage()
         handler.postDelayed({
             chatView.progressStateChanged(false)
             chatListHelper.addItem(botMessage)
-        }, 2000L)
+        }, BOT_MESSAGE_LOADING_DELAY)
         handler.postDelayed({
             chatListHelper.updateLastItem(botMessage.copy(isLoading = false))
             if (isAutoPlayEnabled) {
@@ -79,35 +89,9 @@ internal class ChatEngineImpl(
                     chatView.speak(it)
                 }
             }
-        }, 3000L)
+        }, BOT_MESSAGE_CONTENT_LOADING_DELAY)
         handler.postDelayed({
-            chatView.suggestionsLoaded(buildTestSuggestions(), introAnimations)
-        }, 4000L)
+            chatView.suggestionsLoaded(messagesLoader.buildTestSuggestions(), introAnimations)
+        }, SUGGESTIONS_LOADING_DELAY)
     }
-
-    private fun buildTestUserMessage(message: String?, isTyped: Boolean): ChatMessage.UserMessage {
-        if (isTyped) {
-            messageCounter++
-        }
-        return ChatMessage.UserMessage(messageCounter.toString(), message)
-    }
-
-    private fun buildLoadingTestUserMessage(): ChatMessage.UserMessage {
-        messageCounter++
-        return ChatMessage.UserMessage(messageCounter.toString(), isSpeaking = true)
-    }
-
-    private fun buildTestBotMessage(): ChatMessage.BotMessage {
-        messageCounter++
-        return ChatMessage.BotMessage(messageCounter.toString(), "test", "test", true)
-    }
-
-    private fun buildTestSuggestions(): Triple<ResponseSuggestion, ResponseSuggestion, ResponseSuggestion> {
-        return Triple(
-            ResponseSuggestion("test", "test"),
-            ResponseSuggestion("test2", "test2"),
-            ResponseSuggestion("test3", "test3")
-        )
-    }
-
 }

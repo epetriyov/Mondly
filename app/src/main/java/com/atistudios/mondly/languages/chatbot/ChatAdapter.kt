@@ -106,8 +106,7 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
         init {
             // ugly hack to limit max width of user message TextView
             text_user_message.maxWidth =
-                (containerView.context as Activity).getScreenWidth() -
-                        containerView.context.resources.getDimension(R.dimen.adt_user_views_width).toInt()
+                (containerView.context as Activity).getScreenWidth() - containerView.context.resources.getDimension(R.dimen.adt_user_views_width).toInt()
         }
 
         override fun preAnimateAddImpl(holder: RecyclerView.ViewHolder) {
@@ -118,12 +117,11 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
         override fun preAnimateRemoveImpl(holder: RecyclerView.ViewHolder?) {}
 
         override fun animateAddImpl(holder: RecyclerView.ViewHolder, listener: ViewPropertyAnimatorListener?) {
-            ViewCompat.animate(holder.itemView).apply {
-                translationX(0F)
-                alpha(1F)
-                duration = ITEM_SLIDE_DURATION
-                setListener(listener)
-            }.start()
+            ViewCompat.animate(holder.itemView)
+                .translationX(0F)
+                .alpha(1F)
+                .setDuration(ITEM_SLIDE_DURATION)
+                .setListener(listener)
         }
 
         override fun animateRemoveImpl(holder: RecyclerView.ViewHolder, listener: ViewPropertyAnimatorListener?) {}

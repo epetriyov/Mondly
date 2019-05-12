@@ -76,8 +76,8 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         Speech.init(this, packageName).apply {
             setLocale(chatLanguage)
         }
-        chatEngine = ChatEngineImpl(this, ChatListHelperImpl(), Handler())
-        label_title.text = intent.getStringExtra(EXTRA_CHATBOT_TITLE) ?: getString(R.string.chatbot)
+        chatEngine = ChatEngineImpl(this, ChatListHelperImpl(), MockMessagesLoader(), Handler())
+        label_title.text = intent.getStringExtra(EXTRA_CHATBOT_TITLE) ?: getString(R.string.app_name)
         btn_close.setOnClickListener { finish() }
         chatAdapter = ChatAdapter {
             speak(it)
