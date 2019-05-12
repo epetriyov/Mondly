@@ -233,7 +233,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     private fun initBottomPanel() {
         label_suggestions.isInvisible = true
         suggestions_group.isInvisible = true
-        edit_text_group.isInvisible = true
+        edit_text_group.isVisible = false
         options_group.isVisible = false
         setControlsEnabled(false)
         img_pulse_microphone.alpha = ALPHA_CONTROLS_DISABLED
@@ -342,7 +342,12 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                     showSuggestion(second_suggestion, suggestions.second,
                         object : TransitionEndListener() {
                             override fun onTransitionEnd(transition: Transition) {
-                                showSuggestion(third_suggestion, suggestions.third, null)
+                                showSuggestion(third_suggestion, suggestions.third, object : TransitionEndListener() {
+                                    override fun onTransitionEnd(transition: Transition?) {
+                                        suggestions_group.isInvisible = false
+                                    }
+
+                                })
                             }
                         })
                 }
