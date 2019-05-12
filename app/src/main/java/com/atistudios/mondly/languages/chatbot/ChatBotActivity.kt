@@ -166,7 +166,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     }
 
     override fun progressStateChanged(isLoading: Boolean) {
-        progressBar.isInvisible = !isLoading
+        progressBar.isVisible = isLoading
     }
 
     override fun speak(message: String) {
@@ -321,7 +321,8 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             object : TransitionEndListener() {
                 override fun onTransitionEnd(transition: Transition) {
                     if (introAnimations) {
-                        first_suggestion.findViewById<View>(R.id.text_suggestion).scaleAnimation(FIRST_SUGGESTION_SCALE_FACTOR, FIRST_SUGGESTION_SCALE_DURATION)
+                        first_suggestion.findViewById<View>(R.id.text_suggestion)
+                            .scaleAnimation(FIRST_SUGGESTION_SCALE_FACTOR, FIRST_SUGGESTION_SCALE_DURATION)
                     }
                     showSuggestion(second_suggestion, suggestions.second,
                         object : TransitionEndListener() {
@@ -329,7 +330,10 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                                 showSuggestion(third_suggestion, suggestions.third, object : TransitionEndListener() {
                                     override fun onTransitionEnd(transition: Transition?) {
                                         if (introAnimations) {
-                                            btn_microphone.scaleAnimation(MICROPHONE_SCALE_FACTOR, MICROPHONE_SCALE_DURATION)
+                                            btn_microphone.scaleAnimation(
+                                                MICROPHONE_SCALE_FACTOR,
+                                                MICROPHONE_SCALE_DURATION
+                                            )
                                         }
                                         suggestions_group.isInvisible = false
                                     }
@@ -357,6 +361,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     }
 
     private fun updateFooterHeight() {
+        //dirty hardcoded height of bottom panel
         val footerHeight =
             resources.getDimension(if (options_group.isVisible) R.dimen.max_footer_height else R.dimen.min_footer_height)
         chatEngine.onFooterHeightChanged(footerHeight.toInt())

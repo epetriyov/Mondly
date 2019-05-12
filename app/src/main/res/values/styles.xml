@@ -3,8 +3,8 @@
     <!-- Base application theme. -->
     <style name="ChatBotAppTheme" parent="Theme.AppCompat.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimary">@color/dusk_blue</item>
+        <item name="colorPrimaryDark">@color/dusk_blue</item>
         <item name="colorAccent">@color/turquoise_blue</item>
     </style>
 
