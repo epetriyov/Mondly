@@ -10,6 +10,8 @@ import android.transition.*
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -23,7 +25,6 @@ import com.atistudios.mondly.languages.chatbot.utils.*
 import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator
 import kotlinx.android.synthetic.main.activity_chat.*
 import net.gotev.speech.Speech
-import net.gotev.speech.SpeechDelegate
 import java.util.*
 
 
@@ -57,6 +58,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         private const val FIRST_SUGGESTION_SCALE_FACTOR = 1.3F
         private const val ALPHA_CONTROLS_DISABLED = 0.5F
 
+        // use this method to pass arguments in Activity
         fun buildIntent(context: Context, language: Locale, title: String): Intent {
             return Intent(context, ChatBotActivity::class.java).apply {
                 putExtra(EXTRA_CHATBOT_LANGUAGE, language)
@@ -64,6 +66,8 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             }
         }
     }
+
+    private val handler = Handler()
 
     private lateinit var chatAdapter: ChatAdapter
 
@@ -76,7 +80,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         Speech.init(this, packageName).apply {
             setLocale(chatLanguage)
         }
-        chatEngine = ChatEngineImpl(this, ChatListHelperImpl(), MockMessagesLoader(), Handler())
+        chatEngine = ChatEngineImpl(this, ChatListHelperImpl(), MockMessagesLoader(), handler)
         label_title.text = intent.getStringExtra(EXTRA_CHATBOT_TITLE) ?: getString(R.string.app_name)
         btn_close.setOnClickListener { finish() }
         chatAdapter = ChatAdapter {
@@ -267,16 +271,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         TransitionManager.beginDelayedTransition(bottom_container)
         btn_microphone.isInvisible = true
         pulsator.isInvisible = false
-        Speech.getInstance().startListening(object : SpeechDelegate {
-            override fun onStartOfSpeech() {
-            }
-
-            override fun onSpeechPartialResults(results: MutableList<String>?) {
-            }
-
-            override fun onSpeechRmsChanged(value: Float) {
-            }
-
+        Speech.getInstance().startListening(object : EndSpeechDelegate() {
             override fun onSpeechResult(result: String?) {
                 if (pulsator.isStarted) {
                     speakFinished()
@@ -306,8 +301,14 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     }
 
     private fun translationsVisibilityChanged(areTranslationsVisible: Boolean) {
-        chatEngine.onTranslationsVisibilityChanged(areTranslationsVisible)
-        TransitionManager.beginDelayedTransition(bottom_container as ViewGroup)
+        TransitionManager.beginDelayedTransition(bottom_container as ViewGroup, AutoTransition().apply {
+            addListener(object : TransitionEndListener() {
+                override fun onTransitionEnd(transition: Transition?) {
+                    chatEngine.onTranslationsVisibilityChanged(areTranslationsVisible)
+                }
+
+            })
+        })
         first_suggestion.findViewById<View>(R.id.translation_suggestion).isVisible = areTranslationsVisible
         second_suggestion.findViewById<View>(R.id.translation_suggestion).isVisible = areTranslationsVisible
         third_suggestion.findViewById<View>(R.id.translation_suggestion).isVisible = areTranslationsVisible
@@ -317,46 +318,63 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         suggestions: Triple<ResponseSuggestion, ResponseSuggestion,
                 ResponseSuggestion>, introAnimations: Boolean
     ) {
-        showSuggestion(first_suggestion, suggestions.first,
-            object : TransitionEndListener() {
-                override fun onTransitionEnd(transition: Transition) {
-                    if (introAnimations) {
-                        first_suggestion.findViewById<View>(R.id.text_suggestion)
-                            .scaleAnimation(FIRST_SUGGESTION_SCALE_FACTOR, FIRST_SUGGESTION_SCALE_DURATION)
-                    }
-                    showSuggestion(second_suggestion, suggestions.second,
-                        object : TransitionEndListener() {
-                            override fun onTransitionEnd(transition: Transition) {
-                                showSuggestion(third_suggestion, suggestions.third, object : TransitionEndListener() {
-                                    override fun onTransitionEnd(transition: Transition?) {
-                                        if (introAnimations) {
-                                            btn_microphone.scaleAnimation(
-                                                MICROPHONE_SCALE_FACTOR,
-                                                MICROPHONE_SCALE_DURATION
-                                            )
+        bindSuggestion(first_suggestion as ViewGroup, suggestions.first)
+        bindSuggestion(second_suggestion as ViewGroup, suggestions.second)
+        bindSuggestion(third_suggestion as ViewGroup, suggestions.third)
+        handler.post {
+            showSuggestion(first_suggestion,
+                object : TransitionEndListener() {
+                    override fun onTransitionEnd(transition: Transition) {
+                        if (introAnimations) {
+                            first_suggestion.findViewById<View>(R.id.text_suggestion)
+                                .scaleAnimation(FIRST_SUGGESTION_SCALE_FACTOR, FIRST_SUGGESTION_SCALE_DURATION)
+                        }
+                        showSuggestion(second_suggestion,
+                            object : TransitionEndListener() {
+                                override fun onTransitionEnd(transition: Transition) {
+                                    showSuggestion(third_suggestion, object : TransitionEndListener() {
+                                        override fun onTransitionEnd(transition: Transition?) {
+                                            if (introAnimations) {
+                                                btn_microphone.scaleAnimation(
+                                                    MICROPHONE_SCALE_FACTOR,
+                                                    MICROPHONE_SCALE_DURATION
+                                                )
+                                            }
+                                            suggestions_group.isInvisible = false
                                         }
-                                        suggestions_group.isInvisible = false
-                                    }
 
-                                })
-                            }
-                        })
-                }
-            })
+                                    })
+                                }
+                            })
+                    }
+                })
+        }
     }
 
-    private fun showSuggestion(
-        suggestionViewGroup: View,
-        suggestion: ResponseSuggestion,
-        transitionEndListener: TransitionEndListener?
-    ) {
+    private fun bindSuggestion(viewGroup: ViewGroup, suggestion: ResponseSuggestion) {
+        viewGroup.findViewById<ImageView>(R.id.image_message).apply {
+            if (suggestion.icon != null) {
+                setImageResource(suggestion.icon)
+            }
+        }
+        viewGroup.findViewById<TextView>(R.id.text_suggestion).apply {
+            text = suggestion.text
+        }
+        viewGroup.findViewById<TextView>(R.id.translation_suggestion).apply {
+            text = suggestion.translation
+        }
+        viewGroup.findViewById<View>(R.id.btn_playback).apply {
+            setOnClickListener {
+                speak(suggestion.text)
+            }
+        }
+    }
+
+    private fun showSuggestion(suggestionViewGroup: View, transitionEndListener: TransitionEndListener?) {
         TransitionManager.beginDelayedTransition(bottom_container, Slide().apply {
             slideEdge = Gravity.START
             transitionEndListener?.let { addListener(it) }
         })
-        SuggestionViewBinder.bindView(suggestionViewGroup as ViewGroup, suggestion) {
-            speak(suggestion.text)
-        }
         suggestionViewGroup.visibility = View.VISIBLE
     }
 
