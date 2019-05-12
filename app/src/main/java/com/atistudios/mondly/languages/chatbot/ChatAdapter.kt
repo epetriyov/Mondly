@@ -23,7 +23,7 @@ import kotlinx.android.synthetic.main.adt_chat_user_message.*
 
 private const val ITEM_SLIDE_DURATION = 250L
 private const val TEXT_SCALE_DURATION = 250L
-private const val TEXT_SCALE_FACTOR = 1.5F
+private const val TEXT_SCALE_FACTOR = 1.3F
 
 internal class ChatAdapter(private val botMessageClickListener: ((message: String) -> Unit)?) :
     ListAdapter<ChatMessage, BaseViewHolder>(
@@ -93,7 +93,7 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
             text_message_translation.isVisible = !item.isLoading && item.showTranslation
             text_bot_messages.setOnClickListener {
                 if (!item.text.isNullOrEmpty()) {
-                    text_bot_messages.scaleAnimation(TEXT_SCALE_FACTOR, TEXT_SCALE_DURATION)
+                    text_message.scaleAnimation(TEXT_SCALE_FACTOR, TEXT_SCALE_DURATION)
                     botMessageClickListener.invoke(item.text)
                 }
             }

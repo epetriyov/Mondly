@@ -54,7 +54,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         private const val MICROPHONE_SCALE_DURATION = 250L
         private const val MICROPHONE_SCALE_FACTOR = 1.5F
         private const val FIRST_SUGGESTION_SCALE_DURATION = 250L
-        private const val FIRST_SUGGESTION_SCALE_FACTOR = 1.5F
+        private const val FIRST_SUGGESTION_SCALE_FACTOR = 1.3F
         private const val ALPHA_CONTROLS_DISABLED = 0.5F
 
         fun buildIntent(context: Context, language: Locale, title: String): Intent {
@@ -149,9 +149,6 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         TransitionManager.go(Scene(bottom_container), AutoTransition().apply {
             addListener(object : TransitionEndListener() {
                 override fun onTransitionEnd(transition: Transition) {
-                    if (introAnimations) {
-                        btn_microphone.scaleAnimation(MICROPHONE_SCALE_FACTOR, MICROPHONE_SCALE_DURATION)
-                    }
                     showSuggestions(suggestions, introAnimations)
                 }
             })
@@ -324,13 +321,16 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             object : TransitionEndListener() {
                 override fun onTransitionEnd(transition: Transition) {
                     if (introAnimations) {
-                        first_suggestion.scaleAnimation(FIRST_SUGGESTION_SCALE_FACTOR, FIRST_SUGGESTION_SCALE_DURATION)
+                        first_suggestion.findViewById<View>(R.id.text_suggestion).scaleAnimation(FIRST_SUGGESTION_SCALE_FACTOR, FIRST_SUGGESTION_SCALE_DURATION)
                     }
                     showSuggestion(second_suggestion, suggestions.second,
                         object : TransitionEndListener() {
                             override fun onTransitionEnd(transition: Transition) {
                                 showSuggestion(third_suggestion, suggestions.third, object : TransitionEndListener() {
                                     override fun onTransitionEnd(transition: Transition?) {
+                                        if (introAnimations) {
+                                            btn_microphone.scaleAnimation(MICROPHONE_SCALE_FACTOR, MICROPHONE_SCALE_DURATION)
+                                        }
                                         suggestions_group.isInvisible = false
                                     }
 
