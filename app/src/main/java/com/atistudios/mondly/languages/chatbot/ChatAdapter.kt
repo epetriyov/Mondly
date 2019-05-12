@@ -119,7 +119,7 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
         override fun animateRemoveImpl(holder: RecyclerView.ViewHolder, listener: ViewPropertyAnimatorListener?) {}
 
         fun bindView(item: ChatMessage.UserMessage) {
-            img_message_icon.isInvisible = item.icon == null
+            img_message_icon.isVisible = item.icon != null
             if (item.icon != null) {
                 Glide.with(containerView)
                     .load(item.icon)
