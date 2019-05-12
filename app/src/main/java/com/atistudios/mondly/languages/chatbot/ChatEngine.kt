@@ -8,11 +8,13 @@ internal interface ChatEngine {
 
     fun onUserSpeakStarted()
 
-    fun onUserAnswered(message: String?)
+    fun onUserAnswered(message: String?, isTyped: Boolean)
 
     fun onTranslationsVisibilityChanged(areTranslationsVisible: Boolean)
 
     fun onAutoPlayModeChanged(isAutoPlayEnabled: Boolean)
+
+    fun onFooterHeightChanged(footerHeight: Int)
 }
 
 internal class ChatEngineImpl(
@@ -35,8 +37,13 @@ internal class ChatEngineImpl(
         loadBotMessage(true)
     }
 
-    override fun onUserAnswered(message: String?) {
-        chatListHelper.updateLastItem(buildTestUserMessage(message))
+    override fun onUserAnswered(message: String?, isTyped: Boolean) {
+        val userMessage = buildTestUserMessage(message)
+        if (isTyped) {
+            chatListHelper.addItem(userMessage)
+        } else {
+            chatListHelper.updateLastItem(userMessage)
+        }
         chatView.botMessageLoading()
         loadBotMessage(false)
     }
@@ -52,6 +59,11 @@ internal class ChatEngineImpl(
     override fun onAutoPlayModeChanged(isAutoPlayEnabled: Boolean) {
         this.isAutoPlayEnabled = isAutoPlayEnabled
     }
+
+    override fun onFooterHeightChanged(footerHeight: Int) {
+        chatListHelper.setFooterHeight(footerHeight)
+    }
+
 
     private fun loadBotMessage(introAnimations: Boolean) {
         chatView.progressStateChanged(true)

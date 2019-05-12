@@ -1,6 +1,6 @@
 package com.atistudios.mondly.languages.chatbot
 
-interface ChatListHelper {
+internal interface ChatListHelper {
 
     fun addItem(message: ChatMessage)
 
@@ -13,7 +13,7 @@ interface ChatListHelper {
     fun setListUpdatedListener(listUpdatedCallback: (List<ChatMessage>) -> Unit)
 }
 
-class ChatListHelperImpl : ChatListHelper {
+internal class ChatListHelperImpl : ChatListHelper {
 
     private var chatList = mutableListOf<ChatMessage>()
 
@@ -66,7 +66,7 @@ class ChatListHelperImpl : ChatListHelper {
     }
 
     private fun notifyListener() {
-        listUpdatedCallback?.invoke(chatList)
+        listUpdatedCallback?.invoke(chatList.toMutableList())
     }
 
 }

@@ -4,4 +4,5 @@
     <string name="chatbot_hint_edit_answer">Type here to reply</string>
     <string name="chatbot_auto_play">Autoplay</string>
     <string name="chatbot_translations">Translations</string>
+    <string name="chatbot">Chatbot</string>
 </resources>

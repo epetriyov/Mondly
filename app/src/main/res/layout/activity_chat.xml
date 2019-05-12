@@ -21,6 +21,7 @@
         android:layout_height="48dp"
         android:layout_marginStart="2dp"
         android:background="?attr/selectableItemBackgroundBorderless"
+        android:elevation="@dimen/chatbot_control_panel_elevation"
         android:src="@drawable/ic_close"
         app:layout_constraintBottom_toBottomOf="@id/toolbar"
         app:layout_constraintStart_toStartOf="@id/toolbar"
@@ -116,7 +117,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="2dp"
-            app:layout_constraintBottom_toTopOf="@id/btn_more_options"
+            app:layout_constraintBottom_toTopOf="@id/pulsator"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -145,30 +146,15 @@
             app:layout_constraintBottom_toTopOf="@id/switch_auto_play"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <ImageButton
-            android:id="@+id/btn_microphone"
-            android:layout_width="74dp"
-            android:layout_height="74dp"
-            android:background="@drawable/btn_microphone"
-            android:elevation="@dimen/chatbot_control_panel_elevation"
-            android:src="@drawable/ic_microphone_2"
+        <com.atistudios.mondly.languages.chatbot.PulsatorLayout
+            android:id="@+id/pulsator"
+            android:layout_width="111dp"
+            android:layout_height="111dp"
             app:layout_constraintBottom_toBottomOf="@id/btn_change_input_type"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <pl.bclogic.pulsator4droid.library.PulsatorLayout
-            android:id="@+id/pulsator"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            app:layout_constraintBottom_toBottomOf="@id/btn_microphone"
-            app:layout_constraintEnd_toEndOf="@id/btn_microphone"
-            app:layout_constraintStart_toStartOf="@id/btn_microphone"
-            app:layout_constraintTop_toTopOf="@id/btn_microphone"
+            app:layout_constraintStart_toStartOf="parent"
             app:pulse_color="@color/red_400"
-            app:pulse_count="4"
-            app:pulse_duration="7000"
-            app:pulse_interpolator="Decelerate"
-            app:pulse_repeat="0"
+            app:pulse_duration="700"
             app:pulse_startFromScratch="false">
 
             <ImageView
@@ -178,7 +164,19 @@
                 android:layout_centerInParent="true"
                 android:src="@drawable/ic_microphone_2" />
 
-        </pl.bclogic.pulsator4droid.library.PulsatorLayout>
+        </com.atistudios.mondly.languages.chatbot.PulsatorLayout>
+
+        <ImageButton
+            android:id="@+id/btn_microphone"
+            android:layout_width="74dp"
+            android:layout_height="74dp"
+            android:background="@drawable/btn_microphone"
+            android:elevation="@dimen/chatbot_control_panel_elevation"
+            android:src="@drawable/ic_microphone_2"
+            app:layout_constraintBottom_toBottomOf="@id/pulsator"
+            app:layout_constraintEnd_toEndOf="@id/pulsator"
+            app:layout_constraintStart_toStartOf="@id/pulsator"
+            app:layout_constraintTop_toTopOf="@id/pulsator" />
 
         <View
             android:id="@+id/container_edit_text"
@@ -266,7 +264,7 @@
             android:id="@+id/suggestions_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
+            android:visibility="invisible"
             app:constraint_referenced_ids="first_suggestion,second_suggestion,third_suggestion"
             tools:visibility="visible" />
 
@@ -282,7 +280,7 @@
             android:id="@+id/edit_text_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
+            android:visibility="invisible"
             app:constraint_referenced_ids="container_edit_text,edit_answer,btn_send"
             tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>

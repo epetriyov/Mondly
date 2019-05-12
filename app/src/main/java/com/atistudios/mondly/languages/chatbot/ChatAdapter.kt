@@ -19,10 +19,6 @@ import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.adt_chat_bot_message.*
 import kotlinx.android.synthetic.main.adt_chat_user_message.*
 
-enum class ItemViewType {
-    BOT_MESSAGE_TYPE, USER_MESSAGE_TYPE, FOOTER_TYPE
-}
-
 private const val ITEM_SLIDE_DURATION = 250L
 private const val TEXT_SCALE_DURATION = 250L
 private const val TEXT_SCALE_FACTOR = 1.5F
@@ -39,6 +35,10 @@ internal class ChatAdapter(private val botMessageClickListener: ((message: Strin
                 return oldItem == newItem
             }
         }) {
+
+    enum class ItemViewType {
+        BOT_MESSAGE_TYPE, USER_MESSAGE_TYPE, FOOTER_TYPE
+    }
 
     private var lastPosition = -1
 
@@ -88,7 +88,7 @@ internal class ChatAdapter(private val botMessageClickListener: ((message: Strin
     }
 }
 
-sealed class BaseViewHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView),
+internal sealed class BaseViewHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView),
     LayoutContainer {
 
     class BotMessageViewHolder(containerView: View, private val botMessageClickListener: (message: String) -> Unit?) :
@@ -155,9 +155,9 @@ sealed class BaseViewHolder(override val containerView: View) : RecyclerView.Vie
             }
             if (animateText) {
                 text_user_message.isVisible = false
+                TransitionManager.beginDelayedTransition(itemView as ViewGroup)
+                text_user_message.isVisible = true
             }
-            TransitionManager.beginDelayedTransition(itemView as ViewGroup)
-            text_user_message.isVisible = true
         }
     }
 

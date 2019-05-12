@@ -45,6 +45,4 @@ dependencies {
     implementation 'com.eyalbira.loadingdots:loading-dots:1.0.2'
     // It's a simple dialing progress bar
     implementation 'com.github.silvestrpredko:dot-progress-bar:1.1'
-    // Pulse animation for Android
-    implementation 'pl.bclogic:pulsator4droid:1.0.3'
 }
