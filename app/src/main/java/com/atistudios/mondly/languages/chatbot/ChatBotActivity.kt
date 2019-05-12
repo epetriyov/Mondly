@@ -1,7 +1,6 @@
 package com.atistudios.mondly.languages.chatbot
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -9,10 +8,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.transition.*
 import android.view.Gravity
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -22,10 +19,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE
-import com.atistudios.mondly.languages.chatbot.utils.TransitionEndListener
-import com.atistudios.mondly.languages.chatbot.utils.scaleAnimation
-import com.atistudios.mondly.languages.chatbot.utils.slideDown
-import com.atistudios.mondly.languages.chatbot.utils.slideUp
+import com.atistudios.mondly.languages.chatbot.utils.*
 import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator
 import kotlinx.android.synthetic.main.activity_chat.*
 import net.gotev.speech.Speech
@@ -104,7 +98,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         }
         btn_send.setOnClickListener {
             chatEngine.onUserAnswered(edit_answer.text.toString(), true)
-            hideKeyboard()
+            hideKeyboard(edit_answer)
             edit_answer.text = null
         }
         btn_more_options.setOnClickListener {
@@ -360,13 +354,6 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             speak(suggestion.text)
         }
         suggestionViewGroup.visibility = View.VISIBLE
-    }
-
-    private fun hideKeyboard() {
-        (getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(
-            edit_answer.windowToken,
-            0
-        )
     }
 
     private fun updateFooterHeight() {

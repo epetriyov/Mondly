@@ -1,6 +1,7 @@
 package com.atistudios.mondly.languages.chatbot
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.transition.TransitionManager
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.atistudios.mondly.languages.chatbot.utils.getScreenWidth
 import com.atistudios.mondly.languages.chatbot.utils.scaleAnimation
 import com.bumptech.glide.Glide
 import jp.wasabeef.recyclerview.animators.holder.AnimateViewHolder
@@ -100,6 +102,14 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
 
 
     class UserMessageViewHolder(containerView: View) : BaseViewHolder(containerView), AnimateViewHolder {
+
+        init {
+            // ugly hack to limit max width of user message TextView
+            text_user_message.maxWidth =
+                (containerView.context as Activity).getScreenWidth() -
+                        containerView.context.resources.getDimension(R.dimen.adt_user_views_width).toInt()
+        }
+
         override fun preAnimateAddImpl(holder: RecyclerView.ViewHolder) {
             holder.itemView.translationX = itemView.width.toFloat()
             holder.itemView.alpha = 0F

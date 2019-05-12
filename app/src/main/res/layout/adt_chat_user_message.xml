@@ -14,7 +14,7 @@
         android:background="@drawable/bg_user_message"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingStart="27dp"
+        android:paddingStart="18dp"
         android:paddingTop="13dp"
         android:paddingEnd="18dp"
         android:paddingBottom="13dp"
@@ -33,19 +33,18 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/img_user_avatar"
             app:layout_constraintStart_toStartOf="parent"
-            tools:text="¿Qué desea? \uD83D\uDC69\u200D\uD83D\uDCBB" />
+            tools:text="¿Qué desea?" />
 
         <ImageView
             android:id="@+id/img_message_icon"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginStart="10dp"
-            tools:visibility="gone"
             />
 
         <com.github.silvestrpredko.dotprogressbar.DotProgressBar
             android:id="@+id/loader_user_message"
-            android:layout_width="wrap_content"
+            android:layout_width="50dp"
             android:layout_height="20dp"
             app:amount="3"
             app:animationDirection="right"
