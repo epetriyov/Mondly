@@ -59,7 +59,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         private const val MICROPHONE_SCALE_DURATION = 250L
         private const val MICROPHONE_SCALE_FACTOR = 1.5F
         private const val FIRST_SUGGESTION_SCALE_DURATION = 250L
-        private const val FIRST_SUGGESTION_SCALE_FACTOR = 1.3F
+        private const val FIRST_SUGGESTION_SCALE_FACTOR = 1.05F
         private const val ALPHA_CONTROLS_DISABLED = 0.5F
         private const val SEND_USER_ANSWER_DELAY = 250L
         private const val OPTION_SLIDE_DURATION = 250L
@@ -353,10 +353,6 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             showSuggestion(suggestions.first.text, first_suggestion,
                 object : TransitionEndListener() {
                     override fun onTransitionEnd(transition: Transition) {
-//                        if (introAnimations) {
-//                            first_suggestion.findViewById<View>(R.id.text_suggestion)
-//                                .scaleAnimation(FIRST_SUGGESTION_SCALE_FACTOR, FIRST_SUGGESTION_SCALE_DURATION)
-//                        }
                         showSuggestion(suggestions.second.text, second_suggestion,
                             object : TransitionEndListener() {
                                 override fun onTransitionEnd(transition: Transition) {
@@ -403,6 +399,8 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                     speak(suggestion.text)
                     (drawable as AnimationDrawable).start()
                 }
+                viewGroup.findViewById<View>(R.id.text_suggestion)
+                    .scaleAnimation(FIRST_SUGGESTION_SCALE_FACTOR, FIRST_SUGGESTION_SCALE_DURATION)
             }
         }
     }
