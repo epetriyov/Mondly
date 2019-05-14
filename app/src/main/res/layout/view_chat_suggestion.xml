@@ -4,10 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:elevation="@dimen/chatbot_control_panel_elevation"
     android:clipChildren="false"
     android:clipToPadding="false"
-    >
+    android:elevation="@dimen/chatbot_control_panel_elevation">
 
     <ImageView
         android:id="@+id/image_message"
@@ -56,7 +55,7 @@
         android:layout_marginBottom="8dp"
         android:background="@drawable/btn_microphone"
         android:foreground="?attr/selectableItemBackground"
-        android:src="@drawable/ic_playback"
+        android:src="@drawable/ic_playback_animated"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -64,7 +63,7 @@
     <View
         android:id="@+id/divider_suggestions"
         android:layout_width="0dp"
-        android:layout_height="2dp"
+        android:layout_height="1dp"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
         android:background="@color/black_10"

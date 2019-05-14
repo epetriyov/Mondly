@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.transition.*
@@ -28,7 +29,7 @@ import net.gotev.speech.Speech
 import java.util.*
 
 
-internal interface ChatView {
+interface ChatView {
 
     fun suggestionsLoaded(
         suggestions: Triple<ResponseSuggestion, ResponseSuggestion, ResponseSuggestion>, introAnimations: Boolean
@@ -40,7 +41,7 @@ internal interface ChatView {
 
     fun progressStateChanged(isLoading: Boolean)
 
-    fun speak(message: String)
+    fun speak(message: String, speakRate: Float? = null, speakEndListener: EndTextToSpeechCallback? = null)
 }
 
 class ChatBotActivity : AppCompatActivity(), ChatView {
@@ -50,6 +51,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         private val EXTRA_CHATBOT_LANGUAGE = "extra_chatbot_language"
         private val EXTRA_CHATBOT_TITLE = "extra_chatbot_title"
         private const val MY_PERMISSIONS_RECORD_AUDIO = 89
+        private const val PLAYBACK_WAS_ALREADY_CLICKED = "pb_clicked_tag"
 
         private const val BOTTOM_PANEL_SLIDE_DURATION = 250L
         private const val MICROPHONE_SCALE_DURATION = 250L
@@ -57,6 +59,10 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         private const val FIRST_SUGGESTION_SCALE_DURATION = 250L
         private const val FIRST_SUGGESTION_SCALE_FACTOR = 1.3F
         private const val ALPHA_CONTROLS_DISABLED = 0.5F
+        private const val SEND_USER_ANSWER_DELAY = 250L
+        private const val OPTION_SLIDE_DURATION = 250L
+        private const val OPTION_SPEAK_DELAY = 200L
+        private const val SPEAK_RATE_SLOWER = 0.5F
 
         // use this method to pass arguments in Activity
         fun buildIntent(context: Context, language: Locale, title: String): Intent {
@@ -101,8 +107,11 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             checkPermission()
         }
         btn_send.setOnClickListener {
-            chatEngine.onUserAnswered(edit_answer.text.toString(), true)
             hideKeyboard(edit_answer)
+            handler.postDelayed(
+                { chatEngine.onUserAnswered(edit_answer.text.toString(), true) },
+                SEND_USER_ANSWER_DELAY
+            )
             edit_answer.text = null
         }
         btn_more_options.setOnClickListener {
@@ -170,11 +179,13 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     }
 
     override fun progressStateChanged(isLoading: Boolean) {
-        progressBar.isVisible = isLoading
+        progressBar.isInvisible = !isLoading
     }
 
-    override fun speak(message: String) {
-        Speech.getInstance().say(message)
+    override fun speak(message: String, speakRate: Float?, speakEndListener: EndTextToSpeechCallback?) {
+        Speech.getInstance()
+            .apply { setTextToSpeechRate(speakRate ?: 1F) }
+            .say(message, speakEndListener)
     }
 
     private fun initRecyclerView() {
@@ -190,13 +201,6 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     if (newState == SCROLL_STATE_IDLE) {
                         if (recycler_view_chat_bot.canScrollVertically(-1)) {
-                            toolbar.elevation = resources.getDimension(R.dimen.chatbot_control_panel_elevation)
-                            toolbar.setBackgroundColor(
-                                ContextCompat.getColor(
-                                    this@ChatBotActivity,
-                                    R.color.dusk_blue
-                                )
-                            )
                             bottom_container.slideUp(BOTTOM_PANEL_SLIDE_DURATION)
                         }
                     }
@@ -212,6 +216,14 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                             ContextCompat.getColor(this@ChatBotActivity, android.R.color.transparent)
                         )
                         bottom_container.slideDown(BOTTOM_PANEL_SLIDE_DURATION)
+                    } else if (dy != 0) {
+                        toolbar.elevation = resources.getDimension(R.dimen.chatbot_control_panel_elevation)
+                        toolbar.setBackgroundColor(
+                            ContextCompat.getColor(
+                                this@ChatBotActivity,
+                                R.color.dusk_blue
+                            )
+                        )
                     }
                 }
             })
@@ -322,28 +334,31 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         bindSuggestion(second_suggestion as ViewGroup, suggestions.second)
         bindSuggestion(third_suggestion as ViewGroup, suggestions.third)
         handler.post {
-            showSuggestion(first_suggestion,
+            showSuggestion(suggestions.first.text, first_suggestion,
                 object : TransitionEndListener() {
                     override fun onTransitionEnd(transition: Transition) {
-                        if (introAnimations) {
-                            first_suggestion.findViewById<View>(R.id.text_suggestion)
-                                .scaleAnimation(FIRST_SUGGESTION_SCALE_FACTOR, FIRST_SUGGESTION_SCALE_DURATION)
-                        }
-                        showSuggestion(second_suggestion,
+//                        if (introAnimations) {
+//                            first_suggestion.findViewById<View>(R.id.text_suggestion)
+//                                .scaleAnimation(FIRST_SUGGESTION_SCALE_FACTOR, FIRST_SUGGESTION_SCALE_DURATION)
+//                        }
+                        showSuggestion(suggestions.second.text, second_suggestion,
                             object : TransitionEndListener() {
                                 override fun onTransitionEnd(transition: Transition) {
-                                    showSuggestion(third_suggestion, object : TransitionEndListener() {
-                                        override fun onTransitionEnd(transition: Transition?) {
-                                            if (introAnimations) {
-                                                btn_microphone.scaleAnimation(
-                                                    MICROPHONE_SCALE_FACTOR,
-                                                    MICROPHONE_SCALE_DURATION
-                                                )
+                                    showSuggestion(
+                                        suggestions.third.text,
+                                        third_suggestion,
+                                        object : TransitionEndListener() {
+                                            override fun onTransitionEnd(transition: Transition?) {
+                                                if (introAnimations) {
+                                                    btn_microphone.scaleAnimation(
+                                                        MICROPHONE_SCALE_FACTOR,
+                                                        MICROPHONE_SCALE_DURATION
+                                                    )
+                                                }
+                                                suggestions_group.isInvisible = false
                                             }
-                                            suggestions_group.isInvisible = false
-                                        }
 
-                                    })
+                                        })
                                 }
                             })
                     }
@@ -363,17 +378,40 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         viewGroup.findViewById<TextView>(R.id.translation_suggestion).apply {
             text = suggestion.translation
         }
-        viewGroup.findViewById<View>(R.id.btn_playback).apply {
+        viewGroup.findViewById<ImageView>(R.id.btn_playback).apply {
             setOnClickListener {
-                speak(suggestion.text)
+                if (it.tag == PLAYBACK_WAS_ALREADY_CLICKED) {
+                    speak(suggestion.text, SPEAK_RATE_SLOWER)
+                } else {
+                    it.tag = PLAYBACK_WAS_ALREADY_CLICKED
+                    speak(suggestion.text)
+                    (drawable as AnimationDrawable).start()
+                }
             }
         }
     }
 
-    private fun showSuggestion(suggestionViewGroup: View, transitionEndListener: TransitionEndListener?) {
+    private fun showSuggestion(
+        textToSpeak: String,
+        suggestionViewGroup: View,
+        transitionEndListener: TransitionEndListener?
+    ) {
         TransitionManager.beginDelayedTransition(bottom_container, Slide().apply {
+            duration = OPTION_SLIDE_DURATION
             slideEdge = Gravity.START
-            transitionEndListener?.let { addListener(it) }
+            addListener(object : TransitionEndListener() {
+                override fun onTransitionEnd(transition: Transition?) {
+                    handler.postDelayed({
+                        speak(textToSpeak, speakEndListener = object : EndTextToSpeechCallback() {
+                            override fun onCompleted() {
+                                transitionEndListener?.let { it.onTransitionEnd(transition) }
+                            }
+
+                        })
+                    }, OPTION_SPEAK_DELAY)
+                }
+
+            })
         })
         suggestionViewGroup.visibility = View.VISIBLE
     }

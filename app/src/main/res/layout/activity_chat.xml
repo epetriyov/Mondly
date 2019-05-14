@@ -23,6 +23,7 @@
         android:background="?attr/selectableItemBackground"
         android:elevation="@dimen/chatbot_control_panel_elevation"
         android:src="@drawable/ic_close"
+        android:alpha="0.5"
         app:layout_constraintBottom_toBottomOf="@id/toolbar"
         app:layout_constraintStart_toStartOf="@id/toolbar"
         app:layout_constraintTop_toTopOf="@id/toolbar" />

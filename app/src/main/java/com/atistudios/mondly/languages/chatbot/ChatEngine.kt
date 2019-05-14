@@ -1,6 +1,7 @@
 package com.atistudios.mondly.languages.chatbot
 
 import android.os.Handler
+import com.atistudios.mondly.languages.chatbot.utils.EndTextToSpeechCallback
 
 internal interface ChatEngine {
 
@@ -29,7 +30,7 @@ internal class ChatEngineImpl(
     companion object {
         private const val BOT_MESSAGE_LOADING_DELAY = 2000L
         private const val BOT_MESSAGE_CONTENT_LOADING_DELAY = 3000L
-        private const val SUGGESTIONS_LOADING_DELAY = 4000L
+        private const val SHOW_SUGGESTIONS_LOADING_DELAY = 4000L
     }
 
     init {
@@ -84,14 +85,24 @@ internal class ChatEngineImpl(
         }, BOT_MESSAGE_LOADING_DELAY)
         handler.postDelayed({
             chatListHelper.updateLastItem(botMessage.copy(isLoading = false))
-            if (isAutoPlayEnabled) {
-                botMessage.text?.let {
-                    chatView.speak(it)
-                }
-            }
         }, BOT_MESSAGE_CONTENT_LOADING_DELAY)
         handler.postDelayed({
-            chatView.suggestionsLoaded(messagesLoader.buildTestSuggestions(), introAnimations)
-        }, SUGGESTIONS_LOADING_DELAY)
+            if (isAutoPlayEnabled) {
+                botMessage.text?.let {
+                    chatView.speak(it, speakEndListener = object : EndTextToSpeechCallback() {
+                        override fun onCompleted() {
+                            showSuggestions(introAnimations)
+                        }
+
+                    })
+                }
+            } else {
+                showSuggestions(introAnimations)
+            }
+        }, SHOW_SUGGESTIONS_LOADING_DELAY)
+    }
+
+    private fun showSuggestions(introAnimations: Boolean) {
+        chatView.suggestionsLoaded(messagesLoader.buildTestSuggestions(), introAnimations)
     }
 }
