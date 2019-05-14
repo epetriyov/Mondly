@@ -2,6 +2,7 @@ package com.atistudios.mondly.languages.chatbot
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.os.Handler
 import android.transition.TransitionManager
 import android.view.LayoutInflater
 import android.view.View
@@ -23,9 +24,13 @@ import kotlinx.android.synthetic.main.adt_chat_user_message.*
 
 private const val ITEM_SLIDE_DURATION = 250L
 private const val TEXT_SCALE_DURATION = 250L
+private const val AVATAR_SHOW_DELAY = 500L
 private const val TEXT_SCALE_FACTOR = 1.3F
 
-internal class ChatAdapter(private val botMessageClickListener: ((message: String) -> Unit)?) :
+internal class ChatAdapter(
+    private val handler: Handler,
+    private val botMessageClickListener: ((message: String) -> Unit)?
+) :
     ListAdapter<ChatMessage, BaseViewHolder>(
         object : DiffUtil.ItemCallback<ChatMessage>() {
             override fun areItemsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
@@ -46,7 +51,7 @@ internal class ChatAdapter(private val botMessageClickListener: ((message: Strin
         val layoutInflater = LayoutInflater.from(parent.context)
         return when (ItemViewType.values()[viewType]) {
             ItemViewType.BOT_MESSAGE_TYPE -> BaseViewHolder.BotMessageViewHolder(
-                layoutInflater.inflate(R.layout.adt_chat_bot_message, parent, false)
+                layoutInflater.inflate(R.layout.adt_chat_bot_message, parent, false), handler
             ) { botMessageClickListener?.invoke(it) }
             ItemViewType.USER_MESSAGE_TYPE -> BaseViewHolder.UserMessageViewHolder(
                 layoutInflater.inflate(R.layout.adt_chat_user_message, parent, false)
@@ -81,13 +86,34 @@ internal class ChatAdapter(private val botMessageClickListener: ((message: Strin
 internal sealed class BaseViewHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView),
     LayoutContainer {
 
-    class BotMessageViewHolder(containerView: View, private val botMessageClickListener: (message: String) -> Unit?) :
-        BaseViewHolder(containerView) {
+    class BotMessageViewHolder(
+        containerView: View,
+        private val handler: Handler,
+        private val botMessageClickListener: (message: String) -> Unit?
+    ) :
+        BaseViewHolder(containerView), AnimateViewHolder {
+
+        override fun preAnimateAddImpl(holder: RecyclerView.ViewHolder) {
+            holder.itemView.translationX = -itemView.width.toFloat()
+            holder.itemView.alpha = 0F
+        }
+
+        override fun preAnimateRemoveImpl(holder: RecyclerView.ViewHolder?) {}
+
+        override fun animateAddImpl(holder: RecyclerView.ViewHolder, listener: ViewPropertyAnimatorListener?) {
+            ViewCompat.animate(holder.itemView)
+                .translationX(0F)
+                .alpha(1F)
+                .setDuration(ITEM_SLIDE_DURATION)
+                .setListener(listener)
+        }
+
+        override fun animateRemoveImpl(holder: RecyclerView.ViewHolder, listener: ViewPropertyAnimatorListener?) {}
+
         fun bindView(item: ChatMessage.BotMessage) {
             TransitionManager.beginDelayedTransition(container_message)
             text_message.text = item.text
             text_message_translation.text = item.translation
-            img_bot_avatar.isInvisible = !item.showBotAvatar
             loader_bot_message.isVisible = item.isLoading
             text_message.isVisible = !item.isLoading
             text_message_translation.isVisible = !item.isLoading && item.showTranslation
@@ -97,8 +123,20 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
                     botMessageClickListener.invoke(item.text)
                 }
             }
-            //todo replace with real icon
-            img_bot_avatar.setImageResource(R.drawable.ic_emoji)
+            if (item.showBotAvatar) {
+                if (img_bot_avatar.drawable == null) {
+                    img_bot_avatar.setImageResource(R.drawable.ic_emoji)
+                    handler.postDelayed({
+                        TransitionManager.beginDelayedTransition(containerView as ViewGroup)
+                        //todo replace with real icon
+                        group_bot_avatar.isInvisible = false
+                    }, AVATAR_SHOW_DELAY)
+                } else {
+                    group_bot_avatar.isInvisible = false
+                }
+            } else {
+                group_bot_avatar.isInvisible = true
+            }
         }
     }
 

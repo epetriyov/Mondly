@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.os.Handler
+import android.text.Editable
+import android.text.TextWatcher
 import android.transition.*
 import android.view.Gravity
 import android.view.View
@@ -89,7 +91,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         chatEngine = ChatEngineImpl(this, ChatListHelperImpl(), MockMessagesLoader(), handler)
         label_title.text = intent.getStringExtra(EXTRA_CHATBOT_TITLE) ?: getString(R.string.app_name)
         btn_close.setOnClickListener { finish() }
-        chatAdapter = ChatAdapter {
+        chatAdapter = ChatAdapter(handler) {
             speak(it)
         }
         initRecyclerView()
@@ -117,11 +119,24 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         btn_more_options.setOnClickListener {
             TransitionManager.beginDelayedTransition(bottom_container)
             options_group.isVisible = !options_group.isVisible
+            btn_more_options.alpha = if (options_group.isVisible) 1F else ALPHA_CONTROLS_DISABLED
             updateFooterHeight()
         }
         btn_change_input_type.setOnClickListener { controlModeClicked() }
         switch_auto_play.setOnCheckedChangeListener { _, isChecked -> chatEngine.onAutoPlayModeChanged(isChecked) }
         switch_translations.setOnCheckedChangeListener { _, isChecked -> translationsVisibilityChanged(isChecked) }
+        edit_answer.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                btn_send.alpha = if (s.isNullOrEmpty()) ALPHA_CONTROLS_DISABLED else 1F
+            }
+
+        })
         chatEngine.onChatOpened()
         updateFooterHeight()
     }
@@ -235,9 +250,11 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         suggestions_group.isInvisible = true
         edit_text_group.isVisible = false
         options_group.isVisible = false
+        btn_more_options.alpha = ALPHA_CONTROLS_DISABLED
         setControlsEnabled(false)
         img_pulse_microphone.alpha = ALPHA_CONTROLS_DISABLED
         pulsator.isInvisible = true
+        btn_send.alpha = ALPHA_CONTROLS_DISABLED
     }
 
     private fun setControlsEnabled(enabled: Boolean) {
@@ -245,7 +262,6 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         btn_microphone.isEnabled = enabled
         btn_microphone.alpha = alpha
         btn_send.isEnabled = enabled
-        btn_send.alpha = alpha
     }
 
     private fun checkPermission() {

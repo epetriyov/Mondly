@@ -29,8 +29,8 @@ internal class ChatEngineImpl(
 
     companion object {
         private const val BOT_MESSAGE_LOADING_DELAY = 2000L
-        private const val BOT_MESSAGE_CONTENT_LOADING_DELAY = 3000L
-        private const val SHOW_SUGGESTIONS_LOADING_DELAY = 4000L
+        private const val BOT_MESSAGE_CONTENT_LOADING_DELAY = 3500L
+        private const val SHOW_SUGGESTIONS_LOADING_DELAY = 4500L
     }
 
     init {

@@ -5,39 +5,71 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:animateLayoutChanges="true"
-    android:gravity="bottom"
-    android:orientation="horizontal"
     android:clipChildren="false"
     android:clipToPadding="false"
-    >
+    android:gravity="bottom"
+    android:orientation="horizontal">
 
-    <ImageView
-        android:id="@+id/img_bot_avatar"
-        android:layout_width="71dp"
-        android:layout_height="56dp" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/group_bot_avatar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:visibility="invisible"
+        tools:visibility="visible">
+
+        <ImageView
+            android:id="@+id/img_bot_avatar"
+            android:layout_width="44dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="5dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+        <View
+            android:id="@+id/bg_img_bot_speaker"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:background="@drawable/btn_microphone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/img_bot_speaker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="2dp"
+            android:src="@drawable/ic_speaker_icon_14"
+            app:layout_constraintBottom_toBottomOf="@id/bg_img_bot_speaker"
+            app:layout_constraintEnd_toEndOf="@id/bg_img_bot_speaker"
+            app:layout_constraintTop_toTopOf="@id/bg_img_bot_speaker"
+            tools:visibility="visible" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/container_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
         android:background="@drawable/bg_bot_message"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:orientation="horizontal"
         android:paddingStart="18dp"
         android:paddingTop="13dp"
         android:paddingEnd="27dp"
-        android:paddingBottom="13dp"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        >
+        android:paddingBottom="13dp">
 
         <LinearLayout
             android:id="@+id/text_bot_messages"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:clipChildren="false"
             android:clipToPadding="false"
-            >
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/text_message"
