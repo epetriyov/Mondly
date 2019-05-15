@@ -1,8 +1,10 @@
 package com.atistudios.mondly.languages.chatbot
 
+import android.animation.Animator
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.os.Handler
 import android.transition.TransitionManager
 import android.view.LayoutInflater
 import android.view.View
@@ -24,11 +26,9 @@ import kotlinx.android.synthetic.main.adt_chat_user_message.*
 
 private const val ITEM_SLIDE_DURATION = 250L
 private const val TEXT_SCALE_DURATION = 250L
-private const val AVATAR_SHOW_DELAY = 500L
 private const val TEXT_SCALE_FACTOR = 1.3F
 
 internal class ChatAdapter(
-    private val handler: Handler,
     private val botMessageClickListener: ((message: String) -> Unit)?
 ) :
     ListAdapter<ChatMessage, BaseViewHolder>(
@@ -51,7 +51,7 @@ internal class ChatAdapter(
         val layoutInflater = LayoutInflater.from(parent.context)
         return when (ItemViewType.values()[viewType]) {
             ItemViewType.BOT_MESSAGE_TYPE -> BaseViewHolder.BotMessageViewHolder(
-                layoutInflater.inflate(R.layout.adt_chat_bot_message, parent, false), handler
+                layoutInflater.inflate(R.layout.adt_chat_bot_message, parent, false)
             ) { botMessageClickListener?.invoke(it) }
             ItemViewType.USER_MESSAGE_TYPE -> BaseViewHolder.UserMessageViewHolder(
                 layoutInflater.inflate(R.layout.adt_chat_user_message, parent, false)
@@ -88,24 +88,50 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
 
     class BotMessageViewHolder(
         containerView: View,
-        private val handler: Handler,
         private val botMessageClickListener: (message: String) -> Unit?
     ) :
         BaseViewHolder(containerView), AnimateViewHolder {
 
         override fun preAnimateAddImpl(holder: RecyclerView.ViewHolder) {
-            holder.itemView.translationX = -itemView.width.toFloat()
-            holder.itemView.alpha = 0F
+            itemView.alpha = 0F
+            img_constraint.translationX = -img_constraint.width.toFloat()
         }
 
         override fun preAnimateRemoveImpl(holder: RecyclerView.ViewHolder?) {}
 
         override fun animateAddImpl(holder: RecyclerView.ViewHolder, listener: ViewPropertyAnimatorListener?) {
-            ViewCompat.animate(holder.itemView)
-                .translationX(0F)
-                .alpha(1F)
-                .setDuration(ITEM_SLIDE_DURATION)
-                .setListener(listener)
+            val translationAnimator = ObjectAnimator.ofFloat(
+                img_constraint, "translationX",
+                -img_constraint.width.toFloat(), 0F
+            )
+                .apply {
+                    duration = ITEM_SLIDE_DURATION
+                }
+            val alphaAnimator = ObjectAnimator.ofFloat(itemView, "alpha", 0F, 1F)
+                .apply {
+                    duration = ITEM_SLIDE_DURATION
+                }
+            AnimatorSet()
+                .apply {
+                    play(alphaAnimator).before(translationAnimator)
+                    addListener(object : Animator.AnimatorListener {
+                        override fun onAnimationRepeat(animation: Animator?) {
+                        }
+
+                        override fun onAnimationEnd(animation: Animator?) {
+                            listener?.onAnimationEnd(img_constraint)
+                        }
+
+                        override fun onAnimationCancel(animation: Animator?) {
+                            listener?.onAnimationCancel(img_constraint)
+                        }
+
+                        override fun onAnimationStart(animation: Animator?) {
+                            listener?.onAnimationStart(img_constraint)
+                        }
+                    })
+                    start()
+                }
         }
 
         override fun animateRemoveImpl(holder: RecyclerView.ViewHolder, listener: ViewPropertyAnimatorListener?) {}
@@ -122,20 +148,7 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
                     botMessageClickListener.invoke(item.text)
                 }
             }
-            if (item.showBotAvatar) {
-                if (img_bot_avatar.drawable == null) {
-                    img_bot_avatar.setImageResource(R.drawable.ic_emoji)
-                    handler.postDelayed({
-                        TransitionManager.beginDelayedTransition(containerView as ViewGroup)
-                        //todo replace with real icon
-                        group_bot_avatar.isInvisible = false
-                    }, AVATAR_SHOW_DELAY)
-                } else {
-                    group_bot_avatar.isInvisible = false
-                }
-            } else {
-                group_bot_avatar.isInvisible = true
-            }
+            img_bot_avatar.setImageResource(R.drawable.ic_emoji)
         }
     }
 
@@ -149,7 +162,6 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
         }
 
         override fun preAnimateAddImpl(holder: RecyclerView.ViewHolder) {
-            holder.itemView.translationX = itemView.width.toFloat()
             holder.itemView.alpha = 0F
         }
 
@@ -157,7 +169,6 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
 
         override fun animateAddImpl(holder: RecyclerView.ViewHolder, listener: ViewPropertyAnimatorListener?) {
             ViewCompat.animate(holder.itemView)
-                .translationX(0F)
                 .alpha(1F)
                 .setDuration(ITEM_SLIDE_DURATION)
                 .setListener(listener)

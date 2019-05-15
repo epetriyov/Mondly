@@ -1,7 +1,6 @@
 package com.atistudios.mondly.languages.chatbot
 
 import android.Manifest
-import android.animation.Animator
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -31,11 +30,10 @@ import com.atistudios.mondly.languages.chatbot.ext.hideKeyboard
 import com.atistudios.mondly.languages.chatbot.ext.scaleAnimation
 import com.atistudios.mondly.languages.chatbot.ext.slideDown
 import com.atistudios.mondly.languages.chatbot.ext.slideUp
-import com.atistudios.mondly.languages.chatbot.listeners.EndAnimationListener
 import com.atistudios.mondly.languages.chatbot.listeners.EndSpeechDelegate
 import com.atistudios.mondly.languages.chatbot.listeners.EndTextToSpeechCallback
 import com.atistudios.mondly.languages.chatbot.listeners.TransitionEndListener
-import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator
+import jp.wasabeef.recyclerview.animators.BaseItemAnimator
 import kotlinx.android.synthetic.main.activity_chat.*
 import net.gotev.speech.Speech
 import java.util.*
@@ -105,7 +103,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         chatEngine = ChatEngineImpl(this, ChatListHelperImpl(), MockMessagesLoader(), handler)
         label_title.text = intent.getStringExtra(EXTRA_CHATBOT_TITLE) ?: getString(R.string.app_name)
         btn_close.setOnClickListener { finish() }
-        chatAdapter = ChatAdapter(handler) {
+        chatAdapter = ChatAdapter {
             speak(it)
         }
         initRecyclerView()
@@ -149,16 +147,11 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         switch_auto_play.setOnCheckedChangeListener { _, isChecked -> chatEngine.onAutoPlayModeChanged(isChecked) }
         switch_translations.setOnCheckedChangeListener { _, isChecked -> translationsVisibilityChanged(isChecked) }
         edit_answer.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
-
+            override fun afterTextChanged(s: Editable?) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 btn_send.alpha = if (s.isNullOrEmpty()) ALPHA_CONTROLS_DISABLED else 1F
             }
-
         })
         chatEngine.onChatOpened()
         updateFooterHeight()
@@ -239,7 +232,10 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     private fun initRecyclerView() {
         recycler_view_chat_bot.apply {
             layoutManager = LinearLayoutManager(context)
-            itemAnimator = SlideInLeftAnimator()
+            itemAnimator = object : BaseItemAnimator() {
+                override fun animateRemoveImpl(holder: RecyclerView.ViewHolder?) {}
+                override fun animateAddImpl(holder: RecyclerView.ViewHolder?) {}
+            }
             addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
                 .apply { setDrawable(getDrawable(R.drawable.divider)) })
             adapter = chatAdapter
@@ -507,7 +503,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     }
 
     private fun microphoneBounceAnimation() {
-        btn_microphone.scaleAnimation(MICROPHONE_SCALE_FACTOR, MICROPHONE_SCALE_DURATION,true)
+        btn_microphone.scaleAnimation(MICROPHONE_SCALE_FACTOR, MICROPHONE_SCALE_DURATION, true)
     }
 
     private fun updateFooterHeight() {
