@@ -1,4 +1,4 @@
-package com.atistudios.mondly.languages.chatbot
+package com.atistudios.mondly.languages.chatbot.views
 
 import android.animation.Animator
 import android.animation.AnimatorSet
@@ -11,6 +11,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.animation.*
 import android.widget.RelativeLayout
+import com.atistudios.mondly.languages.chatbot.R
 import java.util.*
 
 /***
@@ -157,22 +158,32 @@ class PulsatorLayout @JvmOverloads constructor(context: Context, attrs: Attribut
         mCount = DEFAULT_COUNT
         mDuration = DEFAULT_DURATION
         mRepeat = DEFAULT_REPEAT
-        mStartFromScratch = DEFAULT_START_FROM_SCRATCH
+        mStartFromScratch =
+            DEFAULT_START_FROM_SCRATCH
         mColor = DEFAULT_COLOR
         mInterpolator = DEFAULT_INTERPOLATOR
 
         try {
-            mCount = attr.getInteger(R.styleable.Pulsator4Droid_pulse_count, DEFAULT_COUNT)
+            mCount = attr.getInteger(
+                R.styleable.Pulsator4Droid_pulse_count,
+                DEFAULT_COUNT
+            )
             mDuration = attr.getInteger(
                 R.styleable.Pulsator4Droid_pulse_duration,
                 DEFAULT_DURATION
             )
-            mRepeat = attr.getInteger(R.styleable.Pulsator4Droid_pulse_repeat, DEFAULT_REPEAT)
+            mRepeat = attr.getInteger(
+                R.styleable.Pulsator4Droid_pulse_repeat,
+                DEFAULT_REPEAT
+            )
             mStartFromScratch = attr.getBoolean(
                 R.styleable.Pulsator4Droid_pulse_startFromScratch,
                 DEFAULT_START_FROM_SCRATCH
             )
-            mColor = attr.getColor(R.styleable.Pulsator4Droid_pulse_color, DEFAULT_COLOR)
+            mColor = attr.getColor(
+                R.styleable.Pulsator4Droid_pulse_color,
+                DEFAULT_COLOR
+            )
             mInterpolator = attr.getInteger(
                 R.styleable.Pulsator4Droid_pulse_interpolator,
                 DEFAULT_INTERPOLATOR
@@ -298,7 +309,8 @@ class PulsatorLayout @JvmOverloads constructor(context: Context, attrs: Attribut
 
         mAnimatorSet = AnimatorSet()
         mAnimatorSet!!.playTogether(animators)
-        mAnimatorSet!!.interpolator = createInterpolator(mInterpolator)
+        mAnimatorSet!!.interpolator =
+            createInterpolator(mInterpolator)
         mAnimatorSet!!.duration = mDuration.toLong()
         mAnimatorSet!!.addListener(mAnimatorListener)
     }
@@ -348,7 +360,8 @@ class PulsatorLayout @JvmOverloads constructor(context: Context, attrs: Attribut
         private val DEFAULT_DURATION = 7000
         private val DEFAULT_REPEAT = INFINITE
         private val DEFAULT_START_FROM_SCRATCH = true
-        private val DEFAULT_INTERPOLATOR = INTERP_LINEAR
+        private val DEFAULT_INTERPOLATOR =
+            INTERP_LINEAR
 
         /**
          * Create interpolator from type.

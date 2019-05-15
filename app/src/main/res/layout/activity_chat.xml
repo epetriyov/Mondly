@@ -148,7 +148,7 @@
             app:layout_constraintBottom_toTopOf="@id/switch_auto_play"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <com.atistudios.mondly.languages.chatbot.PulsatorLayout
+        <com.atistudios.mondly.languages.chatbot.views.PulsatorLayout
             android:id="@+id/pulsator"
             android:layout_width="111dp"
             android:layout_height="111dp"
@@ -166,7 +166,7 @@
                 android:layout_centerInParent="true"
                 android:src="@drawable/ic_microphone_2" />
 
-        </com.atistudios.mondly.languages.chatbot.PulsatorLayout>
+        </com.atistudios.mondly.languages.chatbot.views.PulsatorLayout>
 
         <ImageButton
             android:id="@+id/btn_microphone"

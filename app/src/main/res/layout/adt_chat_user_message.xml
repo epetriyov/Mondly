@@ -41,7 +41,7 @@
             android:layout_height="40dp"
             android:layout_marginStart="10dp" />
 
-        <com.github.silvestrpredko.dotprogressbar.DotProgressBar
+        <com.atistudios.mondly.languages.chatbot.views.DotProgressBar
             android:id="@+id/loader_user_message"
             android:layout_width="50dp"
             android:layout_height="20dp"
