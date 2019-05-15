@@ -1,4 +1,4 @@
-package com.atistudios.mondly.languages.chatbot.utils
+package com.atistudios.mondly.languages.chatbot.ext
 
 import android.app.Activity
 import android.graphics.Point

@@ -3,5 +3,5 @@
     <dimen name="chatbot_control_panel_elevation">4dp</dimen>
     <dimen name="min_footer_height">285dp</dimen>
     <dimen name="max_footer_height">384dp</dimen>
-    <dimen name="adt_user_views_width">146dp</dimen>
+    <dimen name="adt_user_views_width">166dp</dimen>
 </resources>

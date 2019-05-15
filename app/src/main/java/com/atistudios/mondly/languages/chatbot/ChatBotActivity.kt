@@ -1,6 +1,7 @@
 package com.atistudios.mondly.languages.chatbot
 
 import android.Manifest
+import android.animation.Animator
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -11,6 +12,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.transition.*
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -25,7 +27,14 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE
-import com.atistudios.mondly.languages.chatbot.utils.*
+import com.atistudios.mondly.languages.chatbot.ext.hideKeyboard
+import com.atistudios.mondly.languages.chatbot.ext.scaleAnimation
+import com.atistudios.mondly.languages.chatbot.ext.slideDown
+import com.atistudios.mondly.languages.chatbot.ext.slideUp
+import com.atistudios.mondly.languages.chatbot.listeners.EndAnimationListener
+import com.atistudios.mondly.languages.chatbot.listeners.EndSpeechDelegate
+import com.atistudios.mondly.languages.chatbot.listeners.EndTextToSpeechCallback
+import com.atistudios.mondly.languages.chatbot.listeners.TransitionEndListener
 import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator
 import kotlinx.android.synthetic.main.activity_chat.*
 import net.gotev.speech.Speech
@@ -57,8 +66,8 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         private const val PLAYBACK_WAS_ALREADY_CLICKED = "pb_clicked_tag"
 
         private const val BOTTOM_PANEL_SLIDE_DURATION = 250L
-        private const val MICROPHONE_SCALE_DURATION = 250L
-        private const val MICROPHONE_SCALE_FACTOR = 1.5F
+        private const val MICROPHONE_SCALE_DURATION = 200L
+        private const val MICROPHONE_SCALE_FACTOR = 1.2F
         private const val FIRST_SUGGESTION_SCALE_DURATION = 250L
         private const val FIRST_SUGGESTION_SCALE_FACTOR = 1.05F
         private const val ALPHA_CONTROLS_DISABLED = 0.5F
@@ -66,6 +75,8 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         private const val OPTION_SLIDE_DURATION = 250L
         private const val OPTION_SPEAK_DELAY = 200L
         private const val SPEAK_RATE_SLOWER = 0.5F
+        private const val MICROPHONE_START_ANIMATION_DELAY = 3600L
+        private const val MICROPHONE_REPEAT_DURATION = 7000L
 
         // use this method to pass arguments in Activity
         fun buildIntent(context: Context, language: Locale, title: String): Intent {
@@ -81,6 +92,8 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     private lateinit var chatAdapter: ChatAdapter
 
     private lateinit var chatEngine: ChatEngine
+
+    private var loopMicAnimation = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,16 +119,25 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             }
         })
         initBottomPanel()
-        btn_microphone.setOnClickListener {
-            checkPermission()
+        btn_microphone.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> checkPermission()
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> speakFinished()
+                else -> {
+                    //do nothing
+                }
+            }
+            true
         }
         btn_send.setOnClickListener {
             hideKeyboard(edit_answer)
             handler.postDelayed(
-                { chatEngine.onUserAnswered(edit_answer.text.toString(), true) },
+                {
+                    chatEngine.onUserAnswered(edit_answer.text.toString(), true)
+                    edit_answer.text = null
+                },
                 SEND_USER_ANSWER_DELAY
             )
-            edit_answer.text = null
         }
         btn_more_options.setOnClickListener {
             TransitionManager.beginDelayedTransition(bottom_container)
@@ -145,6 +167,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     override fun onDestroy() {
         super.onDestroy()
         Speech.getInstance().shutdown()
+        handler.removeCallbacksAndMessages(null)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
@@ -175,25 +198,32 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         suggestions: Triple<ResponseSuggestion, ResponseSuggestion, ResponseSuggestion>,
         introAnimations: Boolean
     ) {
-        TransitionManager.go(Scene(bottom_container), AutoTransition().apply {
-            addListener(object : TransitionEndListener() {
-                override fun onTransitionEnd(transition: Transition) {
-                    showSuggestions(suggestions, introAnimations)
-                }
+        loopMicAnimation = true
+        handler.post {
+            TransitionManager.go(Scene(bottom_container), AutoTransition().apply {
+                addListener(object : TransitionEndListener() {
+                    override fun onTransitionEnd(transition: Transition) {
+                        showSuggestions(suggestions)
+                    }
+                })
             })
-        })
-        if (introAnimations) {
-            label_suggestions.isInvisible = false
+            if (introAnimations) {
+                label_suggestions.isInvisible = false
+            }
+            setControlsEnabled(true)
+            handler.postDelayed({
+                microphoneBounceAnimation()
+                loopMicroPhoneAnimation()
+            }, MICROPHONE_START_ANIMATION_DELAY)
         }
-        setControlsEnabled(true)
     }
 
     override fun botMessageLoading() {
         TransitionManager.beginDelayedTransition(bottom_container)
         setControlsEnabled(false)
-        first_suggestion.visibility = View.INVISIBLE
-        second_suggestion.visibility = View.INVISIBLE
-        third_suggestion.visibility = View.INVISIBLE
+        first_suggestion.isInvisible = true
+        second_suggestion.isInvisible = true
+        third_suggestion.isInvisible = true
     }
 
     override fun progressStateChanged(isLoading: Boolean) {
@@ -262,7 +292,9 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                 pivotY = 0F
             }
         label_suggestions.isInvisible = true
-        suggestions_group.isInvisible = true
+        first_suggestion.isInvisible = true
+        second_suggestion.isInvisible = true
+        third_suggestion.isInvisible = true
         edit_text_group.isVisible = false
         options_group.isVisible = false
         btn_more_options.alpha = ALPHA_CONTROLS_DISABLED
@@ -311,36 +343,60 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     }
 
     private fun speakStarted() {
-        TransitionManager.beginDelayedTransition(bottom_container)
-        btn_microphone.isInvisible = true
-        pulsator.isInvisible = false
-        Speech.getInstance().startListening(object : EndSpeechDelegate() {
-            override fun onSpeechResult(result: String?) {
-                if (pulsator.isStarted) {
+        loopMicAnimation = false
+        handler.post {
+            TransitionManager.go(Scene(bottom_container), AutoTransition()
+                .apply {
+                    addTarget(btn_microphone)
+                    addTarget(pulsator)
+                })
+            btn_microphone.isInvisible = true
+            pulsator.isInvisible = false
+            Speech.getInstance().startListening(object : EndSpeechDelegate() {
+                override fun onSpeechResult(result: String?) {
+                    if (Speech.getInstance().isListening) {
+                        Speech.getInstance().stopListening()
+                    }
+                    chatEngine.onUserAnswered(result, false)
                     speakFinished()
                 }
-                chatEngine.onUserAnswered(result, false)
-            }
-        })
-        chatEngine.onUserSpeakStarted()
-        pulsator.start()
+            })
+            chatEngine.onUserSpeakStarted()
+            pulsator.start()
+        }
     }
 
     private fun speakFinished() {
-        TransitionManager.beginDelayedTransition(bottom_container)
-        pulsator.stop()
-        pulsator.isInvisible = true
-        btn_microphone.isInvisible = false
-        Speech.getInstance().stopListening()
+        if (pulsator.isStarted) {
+            handler.post {
+                TransitionManager.go(Scene(bottom_container), AutoTransition()
+                    .apply {
+                        addTarget(btn_microphone)
+                        addTarget(pulsator)
+                    })
+                pulsator.stop()
+                pulsator.isInvisible = true
+                btn_microphone.isInvisible = false
+            }
+        }
     }
 
     private fun controlModeClicked() {
-        TransitionManager.beginDelayedTransition(bottom_container)
-        btn_change_input_type.setImageResource(
-            if (!btn_microphone.isInvisible) R.drawable.ic_microphone else R.drawable.ic_keyboard
-        )
-        btn_microphone.isInvisible = !btn_microphone.isInvisible
-        edit_text_group.isVisible = !edit_text_group.isVisible
+        handler.post {
+            TransitionManager.go(Scene(bottom_container), AutoTransition()
+                .apply {
+                    addTarget(btn_change_input_type)
+                    addTarget(btn_microphone)
+                    addTarget(container_edit_text)
+                    addTarget(edit_answer)
+                    addTarget(btn_send)
+                })
+            btn_change_input_type.setImageResource(
+                if (!btn_microphone.isInvisible) R.drawable.ic_microphone else R.drawable.ic_keyboard
+            )
+            btn_microphone.isInvisible = !btn_microphone.isInvisible
+            edit_text_group.isVisible = !edit_text_group.isVisible
+        }
     }
 
     private fun translationsVisibilityChanged(areTranslationsVisible: Boolean) {
@@ -358,38 +414,29 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
 
     private fun showSuggestions(
         suggestions: Triple<ResponseSuggestion, ResponseSuggestion,
-                ResponseSuggestion>, introAnimations: Boolean
+                ResponseSuggestion>
     ) {
         bindSuggestion(first_suggestion as ViewGroup, suggestions.first)
         bindSuggestion(second_suggestion as ViewGroup, suggestions.second)
         bindSuggestion(third_suggestion as ViewGroup, suggestions.third)
-        handler.post {
-            showSuggestion(suggestions.first.text, first_suggestion,
-                object : TransitionEndListener() {
-                    override fun onTransitionEnd(transition: Transition) {
-                        showSuggestion(suggestions.second.text, second_suggestion,
-                            object : TransitionEndListener() {
-                                override fun onTransitionEnd(transition: Transition) {
-                                    showSuggestion(
-                                        suggestions.third.text,
-                                        third_suggestion,
-                                        object : TransitionEndListener() {
-                                            override fun onTransitionEnd(transition: Transition?) {
-                                                if (introAnimations) {
-                                                    btn_microphone.scaleAnimation(
-                                                        MICROPHONE_SCALE_FACTOR,
-                                                        MICROPHONE_SCALE_DURATION
-                                                    )
-                                                }
-                                                suggestions_group.isInvisible = false
-                                            }
+        showSuggestion(suggestions.first.text, first_suggestion,
+            object : TransitionEndListener() {
+                override fun onTransitionEnd(transition: Transition) {
+                    showSuggestion(suggestions.second.text, second_suggestion,
+                        object : TransitionEndListener() {
+                            override fun onTransitionEnd(transition: Transition) {
+                                showSuggestion(
+                                    suggestions.third.text,
+                                    third_suggestion,
+                                    object : TransitionEndListener() {
+                                        override fun onTransitionEnd(transition: Transition?) {
+                                        }
 
-                                        })
-                                }
-                            })
-                    }
-                })
-        }
+                                    })
+                            }
+                        })
+                }
+            })
     }
 
     private fun bindSuggestion(viewGroup: ViewGroup, suggestion: ResponseSuggestion) {
@@ -424,30 +471,51 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         suggestionViewGroup: View,
         transitionEndListener: TransitionEndListener?
     ) {
-        TransitionManager.beginDelayedTransition(bottom_container, Slide().apply {
-            duration = OPTION_SLIDE_DURATION
-            slideEdge = Gravity.START
-            addListener(object : TransitionEndListener() {
-                override fun onTransitionEnd(transition: Transition?) {
-                    handler.postDelayed({
-                        speak(textToSpeak, speakEndListener = object : EndTextToSpeechCallback() {
-                            override fun onCompleted() {
-                                transitionEndListener?.let { it.onTransitionEnd(transition) }
-                            }
+        handler.post {
+            TransitionManager.go(Scene(bottom_container), Slide()
+                .apply {
+                    addTarget(suggestionViewGroup)
+                    duration = OPTION_SLIDE_DURATION
+                    slideEdge = Gravity.START
+                    addListener(object : TransitionEndListener() {
+                        override fun onTransitionEnd(transition: Transition?) {
+                            handler.postDelayed({
+                                speak(textToSpeak, speakEndListener = object : EndTextToSpeechCallback() {
+                                    override fun onCompleted() {
+                                        transitionEndListener?.let { it.onTransitionEnd(transition) }
+                                    }
 
-                        })
-                    }, OPTION_SPEAK_DELAY)
+                                })
+                            }, OPTION_SPEAK_DELAY)
+                        }
+
+                    })
+                })
+            suggestionViewGroup.isInvisible = false
+        }
+    }
+
+    private fun loopMicroPhoneAnimation() {
+        if (loopMicAnimation) {
+            handler.postDelayed({
+                if (loopMicAnimation) {
+                    microphoneBounceAnimation()
+                    loopMicroPhoneAnimation()
                 }
+            }, MICROPHONE_REPEAT_DURATION)
+        }
+    }
 
-            })
-        })
-        suggestionViewGroup.isInvisible = false
+    private fun microphoneBounceAnimation() {
+        btn_microphone.scaleAnimation(MICROPHONE_SCALE_FACTOR, MICROPHONE_SCALE_DURATION,true)
     }
 
     private fun updateFooterHeight() {
         //dirty hardcoded height of bottom panel
-        val footerHeight =
-            resources.getDimension(if (options_group.isVisible) R.dimen.max_footer_height else R.dimen.min_footer_height)
-        chatEngine.onFooterHeightChanged(footerHeight.toInt())
+        chatEngine.onFooterHeightChanged(
+            resources.getDimension(
+                if (options_group.isVisible) R.dimen.max_footer_height else R.dimen.min_footer_height
+            ).toInt()
+        )
     }
 }

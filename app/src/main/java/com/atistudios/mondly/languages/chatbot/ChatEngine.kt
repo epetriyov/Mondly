@@ -1,7 +1,7 @@
 package com.atistudios.mondly.languages.chatbot
 
 import android.os.Handler
-import com.atistudios.mondly.languages.chatbot.utils.EndTextToSpeechCallback
+import com.atistudios.mondly.languages.chatbot.listeners.EndTextToSpeechCallback
 
 internal interface ChatEngine {
 

@@ -264,12 +264,6 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.constraintlayout.widget.Group
-            android:id="@+id/suggestions_group"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:constraint_referenced_ids="first_suggestion,second_suggestion,third_suggestion" />
-
-        <androidx.constraintlayout.widget.Group
             android:id="@+id/options_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

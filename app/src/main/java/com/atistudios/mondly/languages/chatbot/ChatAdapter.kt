@@ -14,8 +14,8 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.atistudios.mondly.languages.chatbot.utils.getScreenWidth
-import com.atistudios.mondly.languages.chatbot.utils.scaleAnimation
+import com.atistudios.mondly.languages.chatbot.ext.getScreenWidth
+import com.atistudios.mondly.languages.chatbot.ext.scaleAnimation
 import com.bumptech.glide.Glide
 import jp.wasabeef.recyclerview.animators.holder.AnimateViewHolder
 import kotlinx.android.extensions.LayoutContainer
