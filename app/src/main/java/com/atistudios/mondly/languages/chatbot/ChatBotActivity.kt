@@ -16,6 +16,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isInvisible
@@ -190,7 +191,9 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     override fun botMessageLoading() {
         TransitionManager.beginDelayedTransition(bottom_container)
         setControlsEnabled(false)
-        suggestions_group.isInvisible = true
+        first_suggestion.visibility = View.INVISIBLE
+        second_suggestion.visibility = View.INVISIBLE
+        third_suggestion.visibility = View.INVISIBLE
     }
 
     override fun progressStateChanged(isLoading: Boolean) {
@@ -246,6 +249,18 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     }
 
     private fun initBottomPanel() {
+        first_suggestion.findViewById<View>(R.id.translation_suggestion)
+            .apply {
+                pivotY = 0F
+            }
+        second_suggestion.findViewById<View>(R.id.translation_suggestion)
+            .apply {
+                pivotY = 0F
+            }
+        third_suggestion.findViewById<View>(R.id.translation_suggestion)
+            .apply {
+                pivotY = 0F
+            }
         label_suggestions.isInvisible = true
         suggestions_group.isInvisible = true
         edit_text_group.isVisible = false
@@ -329,17 +344,16 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     }
 
     private fun translationsVisibilityChanged(areTranslationsVisible: Boolean) {
-        TransitionManager.beginDelayedTransition(bottom_container as ViewGroup, AutoTransition().apply {
-            addListener(object : TransitionEndListener() {
-                override fun onTransitionEnd(transition: Transition?) {
-                    chatEngine.onTranslationsVisibilityChanged(areTranslationsVisible)
-                }
-
-            })
-        })
-        first_suggestion.findViewById<View>(R.id.translation_suggestion).isVisible = areTranslationsVisible
-        second_suggestion.findViewById<View>(R.id.translation_suggestion).isVisible = areTranslationsVisible
-        third_suggestion.findViewById<View>(R.id.translation_suggestion).isVisible = areTranslationsVisible
+        chatEngine.onTranslationsVisibilityChanged(areTranslationsVisible)
+        if (areTranslationsVisible) {
+            (first_suggestion as MotionLayout).transitionToStart()
+            (second_suggestion as MotionLayout).transitionToStart()
+            (third_suggestion as MotionLayout).transitionToStart()
+        } else {
+            (first_suggestion as MotionLayout).transitionToEnd()
+            (second_suggestion as MotionLayout).transitionToEnd()
+            (third_suggestion as MotionLayout).transitionToEnd()
+        }
     }
 
     private fun showSuggestions(
@@ -427,7 +441,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
 
             })
         })
-        suggestionViewGroup.visibility = View.VISIBLE
+        suggestionViewGroup.isInvisible = false
     }
 
     private fun updateFooterHeight() {

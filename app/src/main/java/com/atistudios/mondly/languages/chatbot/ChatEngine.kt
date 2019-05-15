@@ -39,6 +39,8 @@ internal class ChatEngineImpl(
         }
     }
 
+    private var areTranslationsVisible = true
+
     private var isAutoPlayEnabled = true
 
     override fun onChatOpened() {
@@ -61,6 +63,7 @@ internal class ChatEngineImpl(
     }
 
     override fun onTranslationsVisibilityChanged(areTranslationsVisible: Boolean) {
+        this.areTranslationsVisible = areTranslationsVisible
         chatListHelper.setTranslationsVisibility(areTranslationsVisible)
     }
 
@@ -78,7 +81,7 @@ internal class ChatEngineImpl(
 
     private fun loadBotMessage(introAnimations: Boolean) {
         chatView.progressStateChanged(true)
-        val botMessage = messagesLoader.buildTestBotMessage()
+        val botMessage = messagesLoader.buildTestBotMessage(areTranslationsVisible)
         handler.postDelayed({
             chatView.progressStateChanged(false)
             chatListHelper.addItem(botMessage)

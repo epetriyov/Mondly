@@ -3,7 +3,7 @@ package com.atistudios.mondly.languages.chatbot
 interface MessagesLoader {
     fun buildTestUserMessage(message: String?, isTyped: Boolean): ChatMessage.UserMessage
     fun buildLoadingTestUserMessage(): ChatMessage.UserMessage
-    fun buildTestBotMessage(): ChatMessage.BotMessage
+    fun buildTestBotMessage(areTranslationsVisible: Boolean): ChatMessage.BotMessage
     fun buildTestSuggestions(): Triple<ResponseSuggestion, ResponseSuggestion, ResponseSuggestion>
 }
 
@@ -26,9 +26,15 @@ class MockMessagesLoader : MessagesLoader {
         )
     }
 
-    override fun buildTestBotMessage(): ChatMessage.BotMessage {
+    override fun buildTestBotMessage(areTranslationsVisible: Boolean): ChatMessage.BotMessage {
         messageCounter++
-        return ChatMessage.BotMessage(messageCounter.toString(), "test", "test", true)
+        return ChatMessage.BotMessage(
+            messageCounter.toString(),
+            "test",
+            "test",
+            true,
+            showTranslation = areTranslationsVisible
+        )
     }
 
     override fun buildTestSuggestions(): Triple<ResponseSuggestion, ResponseSuggestion, ResponseSuggestion> {

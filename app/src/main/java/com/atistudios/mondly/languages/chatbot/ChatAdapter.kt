@@ -111,13 +111,12 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
         override fun animateRemoveImpl(holder: RecyclerView.ViewHolder, listener: ViewPropertyAnimatorListener?) {}
 
         fun bindView(item: ChatMessage.BotMessage) {
-            TransitionManager.beginDelayedTransition(container_message)
             text_message.text = item.text
             text_message_translation.text = item.translation
-            loader_bot_message.isVisible = item.isLoading
-            text_message.isVisible = !item.isLoading
-            text_message_translation.isVisible = !item.isLoading && item.showTranslation
-            text_bot_messages.setOnClickListener {
+            loader_bot_message.isInvisible = !item.isLoading
+            text_message.isInvisible = item.isLoading
+            text_message_translation.isInvisible = item.isLoading || !item.showTranslation
+            text_message.setOnClickListener {
                 if (!item.text.isNullOrEmpty()) {
                     text_message.scaleAnimation(TEXT_SCALE_FACTOR, TEXT_SCALE_DURATION)
                     botMessageClickListener.invoke(item.text)

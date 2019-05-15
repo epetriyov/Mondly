@@ -1,110 +1,121 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:animateLayoutChanges="true"
     android:clipChildren="false"
-    android:clipToPadding="false"
-    android:gravity="bottom"
-    android:orientation="horizontal">
+    android:clipToPadding="false">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <ImageView
+        android:id="@+id/img_bot_avatar"
+        android:layout_width="44dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="15dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:visibility="visible" />
+
+    <View
+        android:id="@+id/bg_img_bot_speaker"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:layout_marginStart="35dp"
+        android:background="@drawable/btn_microphone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/img_bot_speaker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="2dp"
+        android:src="@drawable/ic_speaker_icon_14"
+        app:layout_constraintBottom_toBottomOf="@id/bg_img_bot_speaker"
+        app:layout_constraintEnd_toEndOf="@id/bg_img_bot_speaker"
+        app:layout_constraintTop_toTopOf="@id/bg_img_bot_speaker"
+        tools:visibility="visible" />
+
+    <androidx.constraintlayout.widget.Group
         android:id="@+id/group_bot_avatar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
         android:visibility="invisible"
-        tools:visibility="visible">
+        app:constraint_referenced_ids="img_bot_avatar,bg_img_bot_speaker,img_bot_speaker" />
 
-        <ImageView
-            android:id="@+id/img_bot_avatar"
-            android:layout_width="44dp"
-            android:layout_height="56dp"
-            android:layout_marginEnd="5dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="visible" />
 
-        <View
-            android:id="@+id/bg_img_bot_speaker"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
-            android:background="@drawable/btn_microphone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            tools:visibility="visible" />
-
-        <ImageView
-            android:id="@+id/img_bot_speaker"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="5dp"
-            android:layout_marginBottom="2dp"
-            android:src="@drawable/ic_speaker_icon_14"
-            app:layout_constraintBottom_toBottomOf="@id/bg_img_bot_speaker"
-            app:layout_constraintEnd_toEndOf="@id/bg_img_bot_speaker"
-            app:layout_constraintTop_toTopOf="@id/bg_img_bot_speaker"
-            tools:visibility="visible" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <LinearLayout
+    <View
         android:id="@+id/container_message"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout_marginStart="10dp"
         android:background="@drawable/bg_bot_message"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:orientation="horizontal"
-        android:paddingStart="18dp"
-        android:paddingTop="13dp"
-        android:paddingEnd="27dp"
-        android:paddingBottom="13dp">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/space"
+        app:layout_constraintStart_toEndOf="@id/bg_img_bot_speaker"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <LinearLayout
-            android:id="@+id/text_bot_messages"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:orientation="vertical">
+    <TextView
+        android:id="@+id/text_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="13dp"
+        android:textColor="@color/black"
+        android:textSize="21sp"
+        app:layout_constraintStart_toEndOf="@id/bg_img_bot_speaker"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="asdasd" />
 
-            <TextView
-                android:id="@+id/text_message"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:textSize="21sp"
-                tools:text="¿Qué desea?" />
+    <TextView
+        android:id="@+id/text_message_translation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="13dp"
+        android:textColor="@color/greyish_brown"
+        android:textSize="17sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@id/text_message"
+        app:layout_constraintTop_toBottomOf="@id/text_message"
+        tools:text="asdasd" />
 
-            <TextView
-                android:id="@+id/text_message_translation"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:textColor="@color/greyish_brown"
-                android:textSize="17sp"
-                tools:text="What would you like?" />
-        </LinearLayout>
-
-        <com.eyalbira.loadingdots.LoadingDots
-            android:id="@+id/loader_bot_message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            app:LoadingDots_auto_play="true"
-            app:LoadingDots_dots_color="@color/dusk_blue"
-            app:LoadingDots_dots_count="3"
-            app:LoadingDots_dots_size="10dp"
-            app:LoadingDots_dots_space="5dp"
-            app:LoadingDots_jump_height="10dp" />
-    </LinearLayout>
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="right"
+        app:constraint_referenced_ids="text_message,text_message_translation,loader_bot_message"
+        tools:layout_editor_absoluteX="89dp" />
 
     <Space
-        android:layout_width="0dp"
+        android:id="@+id/space"
+        android:layout_width="27dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1" />
+        app:layout_constraintStart_toEndOf="@id/barrier"
+        app:layout_constraintTop_toTopOf="parent" />
 
-</LinearLayout>
+
+    <com.eyalbira.loadingdots.LoadingDots
+        android:id="@+id/loader_bot_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="13dp"
+        android:layout_marginEnd="27dp"
+        android:layout_marginBottom="13dp"
+        app:LoadingDots_auto_play="true"
+        app:LoadingDots_dots_color="@color/dusk_blue"
+        app:LoadingDots_dots_count="3"
+        app:LoadingDots_dots_size="10dp"
+        app:LoadingDots_dots_space="5dp"
+        app:LoadingDots_jump_height="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/space"
+        app:layout_constraintStart_toStartOf="@id/text_message"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.motion.widget.MotionLayout>
