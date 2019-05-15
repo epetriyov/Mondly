@@ -159,6 +159,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
 
     override fun onDestroy() {
         super.onDestroy()
+        chatEngine.onDestroy()
         Speech.getInstance().shutdown()
         handler.removeCallbacksAndMessages(null)
     }
