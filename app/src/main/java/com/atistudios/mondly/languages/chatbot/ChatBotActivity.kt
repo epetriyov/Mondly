@@ -35,6 +35,7 @@ import com.atistudios.mondly.languages.chatbot.listeners.EndTextToSpeechCallback
 import com.atistudios.mondly.languages.chatbot.listeners.TransitionEndListener
 import jp.wasabeef.recyclerview.animators.BaseItemAnimator
 import kotlinx.android.synthetic.main.activity_chat.*
+import kotlinx.android.synthetic.main.view_options_container.*
 import net.gotev.speech.Speech
 import java.util.*
 

@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bottom_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_control_panel"
+    android:elevation="@dimen/chatbot_control_panel_elevation">
+
+    <Space
+        android:id="@+id/panel_top_space"
+        android:layout_width="0dp"
+        android:layout_height="10dp"
+        app:layout_constraintBottom_toTopOf="@id/label_suggestions"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/label_suggestions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:elevation="@dimen/chatbot_control_panel_elevation"
+        android:text="@string/chatbot_suggestions"
+        android:textColor="@color/white_80"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toTopOf="@id/first_suggestion"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <include
+        android:id="@+id/first_suggestion"
+        layout="@layout/view_chat_suggestion"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/second_suggestion"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <include
+        android:id="@+id/second_suggestion"
+        layout="@layout/view_chat_suggestion"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/third_suggestion"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <include
+        android:id="@+id/third_suggestion"
+        layout="@layout/view_chat_suggestion"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="2dp"
+        app:layout_constraintBottom_toTopOf="@id/pulsator"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:id="@+id/btn_more_options"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="?attr/selectableItemBackground"
+        android:elevation="@dimen/chatbot_control_panel_elevation"
+        android:src="@drawable/ic_more_options"
+        app:layout_constraintBottom_toTopOf="@id/btn_change_input_type"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageButton
+        android:id="@+id/btn_change_input_type"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/bg_change_input_type"
+        android:elevation="@dimen/chatbot_control_panel_elevation"
+        android:foreground="?attr/selectableItemBackground"
+        android:src="@drawable/ic_keyboard"
+        app:layout_constraintBottom_toTopOf="@id/options_group"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.atistudios.mondly.languages.chatbot.views.PulsatorLayout
+        android:id="@+id/pulsator"
+        android:layout_width="111dp"
+        android:layout_height="111dp"
+        app:layout_constraintBottom_toBottomOf="@id/btn_change_input_type"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:pulse_color="@color/red_400"
+        app:pulse_duration="700"
+        app:pulse_startFromScratch="false">
+
+        <ImageView
+            android:id="@+id/img_pulse_microphone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:src="@drawable/ic_microphone_2" />
+
+    </com.atistudios.mondly.languages.chatbot.views.PulsatorLayout>
+
+    <ImageButton
+        android:id="@+id/btn_microphone"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:background="@drawable/btn_microphone"
+        android:elevation="@dimen/chatbot_control_panel_elevation"
+        android:src="@drawable/ic_microphone_2"
+        app:layout_constraintBottom_toBottomOf="@id/pulsator"
+        app:layout_constraintEnd_toEndOf="@id/pulsator"
+        app:layout_constraintStart_toStartOf="@id/pulsator"
+        app:layout_constraintTop_toTopOf="@id/pulsator" />
+
+    <View
+        android:id="@+id/container_edit_text"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:background="@drawable/bg_edit_text"
+        android:elevation="@dimen/chatbot_control_panel_elevation"
+        app:layout_constraintBottom_toBottomOf="@id/btn_change_input_type"
+        app:layout_constraintEnd_toStartOf="@id/btn_change_input_type"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/btn_change_input_type" />
+
+    <EditText
+        android:id="@+id/edit_answer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="18dp"
+        android:layout_marginEnd="10dp"
+        android:background="@null"
+        android:elevation="@dimen/chatbot_control_panel_elevation"
+        android:hint="@string/chatbot_hint_edit_answer"
+        android:textColor="@color/white_50"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="@id/container_edit_text"
+        app:layout_constraintEnd_toStartOf="@id/btn_send"
+        app:layout_constraintStart_toStartOf="@id/container_edit_text"
+        app:layout_constraintTop_toTopOf="@id/container_edit_text"
+        tools:text="@string/chatbot_hint_edit_answer" />
+
+    <ImageButton
+        android:id="@+id/btn_send"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackground"
+        android:elevation="@dimen/chatbot_control_panel_elevation"
+        android:src="@drawable/ic_send"
+        app:layout_constraintBottom_toBottomOf="@id/container_edit_text"
+        app:layout_constraintEnd_toEndOf="@id/container_edit_text"
+        app:layout_constraintTop_toTopOf="@id/container_edit_text" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/options_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:visibility="visible">
+
+        <Switch
+            android:id="@+id/switch_auto_play"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:checked="true"
+            android:elevation="@dimen/chatbot_control_panel_elevation"
+            android:text="@string/chatbot_auto_play"
+            android:textColor="@android:color/white"
+            android:textSize="17sp"
+            app:layout_constraintBottom_toTopOf="@id/divider_switch"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <View
+            android:id="@+id/divider_switch"
+            android:layout_width="0dp"
+            android:layout_height="2dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="@color/black_10"
+            android:elevation="@dimen/chatbot_control_panel_elevation"
+            app:layout_constraintBottom_toTopOf="@id/switch_translations"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Switch
+            android:id="@+id/switch_translations"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:checked="true"
+            android:elevation="@dimen/chatbot_control_panel_elevation"
+            android:text="@string/chatbot_translations"
+            android:textColor="@android:color/white"
+            android:textSize="17sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/edit_text_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="container_edit_text,edit_answer,btn_send"
+        tools:visibility="visible" />
+</androidx.constraintlayout.widget.ConstraintLayout>
