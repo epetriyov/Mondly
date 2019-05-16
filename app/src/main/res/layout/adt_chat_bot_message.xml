@@ -6,7 +6,9 @@
     android:layout_height="wrap_content"
     android:animateLayoutChanges="true"
     android:clipChildren="false"
-    android:clipToPadding="false">
+    android:clipToPadding="false"
+    app:layoutDescription="@xml/message_motion"
+    >
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/img_constraint"

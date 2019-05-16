@@ -9,6 +9,7 @@ import android.transition.TransitionManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.ViewPropertyAnimatorListener
 import androidx.core.view.isInvisible
@@ -137,11 +138,17 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
         override fun animateRemoveImpl(holder: RecyclerView.ViewHolder, listener: ViewPropertyAnimatorListener?) {}
 
         fun bindView(item: ChatMessage.BotMessage) {
+            text_message_translation.pivotY = 0F
             text_message.text = item.text
             text_message_translation.text = item.translation
             loader_bot_message.isInvisible = !item.isLoading
             text_message.isInvisible = item.isLoading
-            text_message_translation.isInvisible = item.isLoading || !item.showTranslation
+            text_message_translation.isInvisible = item.isLoading
+            if (!item.showTranslation) {
+                (containerView as MotionLayout).transitionToEnd()
+            } else {
+                (containerView as MotionLayout).transitionToStart()
+            }
             text_message.setOnClickListener {
                 if (!item.text.isNullOrEmpty()) {
                     text_message.scaleAnimation(TEXT_SCALE_FACTOR, TEXT_SCALE_DURATION)
