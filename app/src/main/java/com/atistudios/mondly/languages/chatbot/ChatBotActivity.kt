@@ -77,6 +77,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         private const val SPEAK_RATE_SLOWER = 0.5F
         private const val MICROPHONE_START_ANIMATION_DELAY = 3600L
         private const val MICROPHONE_REPEAT_DURATION = 7000L
+        private const val SUGGESTIONS_SHOW_DELAY = 3000L
 
         // use this method to pass arguments in Activity
         fun buildIntent(context: Context, language: Locale, title: String): Intent {
@@ -196,17 +197,14 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     ) {
         loopMicAnimation = true
         handler.post {
-            TransitionManager.go(Scene(bottom_container), AutoTransition().apply {
-                addListener(object : TransitionEndListener() {
-                    override fun onTransitionEnd(transition: Transition) {
-                        showSuggestions(suggestions)
-                    }
-                })
-            })
+            TransitionManager.beginDelayedTransition(bottom_container)
             if (introAnimations) {
                 label_suggestions.isInvisible = false
             }
             setControlsEnabled(true)
+            handler.postDelayed({
+                showSuggestions(suggestions)
+            }, SUGGESTIONS_SHOW_DELAY)
             handler.postDelayed({
                 microphoneBounceAnimation()
                 loopMicroPhoneAnimation()
