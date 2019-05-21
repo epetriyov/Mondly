@@ -275,26 +275,33 @@ class PulsatorLayout @JvmOverloads constructor(context: Context, attrs: Attribut
         val repeatCount = if (mRepeat == INFINITE) ObjectAnimator.INFINITE else mRepeat
 
         val animators = ArrayList<Animator>()
-        for (index in 0 until mCount) {
+        val pulseView = PulseView(context)
+        pulseView.scaleX = 0.66f
+        pulseView.scaleY = 0.66f
+        pulseView.alpha = 0.66f
+
+        addView(pulseView, 0, layoutParams)
+        mViews.add(pulseView)
+        for (index in 0 until mCount - 1) {
             // setup view
             val pulseView = PulseView(context)
-            pulseView.scaleX = 1f
-            pulseView.scaleY = 1f
-            pulseView.alpha = 1f
+            pulseView.scaleX = 0.66f
+            pulseView.scaleY = 0.66f
+            pulseView.alpha = 0.66f
 
-            addView(pulseView, index, layoutParams)
+            addView(pulseView, index + 1, layoutParams)
             mViews.add(pulseView)
 
             val delay = (index * mDuration / mCount).toLong()
 
             // setup animators
-            val scaleXAnimator = ObjectAnimator.ofFloat(pulseView, "ScaleX", 0.5f, 1f)
+            val scaleXAnimator = ObjectAnimator.ofFloat(pulseView, "ScaleX", 0.66f, 1f)
             scaleXAnimator.repeatCount = repeatCount
             scaleXAnimator.repeatMode = ObjectAnimator.RESTART
             scaleXAnimator.startDelay = delay
             animators.add(scaleXAnimator)
 
-            val scaleYAnimator = ObjectAnimator.ofFloat(pulseView, "ScaleY", 0.5f, 1f)
+            val scaleYAnimator = ObjectAnimator.ofFloat(pulseView, "ScaleY", 0.66f, 1f)
             scaleYAnimator.repeatCount = repeatCount
             scaleYAnimator.repeatMode = ObjectAnimator.RESTART
             scaleYAnimator.startDelay = delay
@@ -357,7 +364,7 @@ class PulsatorLayout @JvmOverloads constructor(context: Context, attrs: Attribut
 
         private val DEFAULT_COUNT = 4
         private val DEFAULT_COLOR = Color.rgb(0, 116, 193)
-        private val DEFAULT_DURATION = 7000
+        private val DEFAULT_DURATION = 3000
         private val DEFAULT_REPEAT = INFINITE
         private val DEFAULT_START_FROM_SCRATCH = true
         private val DEFAULT_INTERPOLATOR =

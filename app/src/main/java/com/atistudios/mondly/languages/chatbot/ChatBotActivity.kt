@@ -120,20 +120,24 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             }
         })
         initBottomPanel()
+        btn_microphone.setOnLongClickListener {
+            checkPermission()
+            return@setOnLongClickListener true
+        }
         btn_microphone.setOnTouchListener { _, event ->
             when (event.action) {
-                MotionEvent.ACTION_DOWN -> checkPermission()
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> speakFinished()
                 else -> {
                     //do nothing
                 }
             }
-            true
+            false
         }
         btn_send.setOnClickListener {
             hideKeyboard(edit_answer)
             handler.postDelayed(
                 {
+                    setControlsEnabled(false)
                     chatEngine.onUserAnswered(edit_answer.text.toString(), true)
                     edit_answer.text = null
                 },
@@ -214,7 +218,6 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
 
     override fun botMessageLoading() {
         TransitionManager.beginDelayedTransition(bottom_container)
-        setControlsEnabled(false)
         first_suggestion.isInvisible = true
         second_suggestion.isInvisible = true
         third_suggestion.isInvisible = true
@@ -374,6 +377,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                 pulsator.stop()
                 pulsator.isInvisible = true
                 btn_microphone.isInvisible = false
+                setControlsEnabled(false)
             }
         }
     }

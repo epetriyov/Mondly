@@ -88,8 +88,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:pulse_color="@color/red_400"
-        app:pulse_duration="700"
-        app:pulse_startFromScratch="false">
+        app:pulse_startFromScratch="true">
 
         <ImageView
             android:id="@+id/img_pulse_microphone"
