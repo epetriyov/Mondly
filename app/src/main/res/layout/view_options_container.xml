@@ -62,8 +62,8 @@
         android:layout_height="48dp"
         android:layout_marginEnd="4dp"
         android:layout_marginBottom="4dp"
-        android:background="?attr/selectableItemBackground"
         android:elevation="@dimen/chatbot_control_panel_elevation"
+        android:background="@null"
         android:src="@drawable/ic_more_options"
         app:layout_constraintBottom_toTopOf="@id/btn_change_input_type"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -76,7 +76,6 @@
         android:layout_marginBottom="12dp"
         android:background="@drawable/bg_change_input_type"
         android:elevation="@dimen/chatbot_control_panel_elevation"
-        android:foreground="?attr/selectableItemBackground"
         android:src="@drawable/ic_keyboard"
         app:layout_constraintBottom_toTopOf="@id/options_group"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -101,17 +100,25 @@
 
     </com.atistudios.mondly.languages.chatbot.views.PulsatorLayout>
 
-    <ImageButton
+    <FrameLayout
         android:id="@+id/btn_microphone"
         android:layout_width="74dp"
         android:layout_height="74dp"
         android:background="@drawable/btn_microphone"
         android:elevation="@dimen/chatbot_control_panel_elevation"
-        android:src="@drawable/ic_microphone_2"
         app:layout_constraintBottom_toBottomOf="@id/pulsator"
         app:layout_constraintEnd_toEndOf="@id/pulsator"
         app:layout_constraintStart_toStartOf="@id/pulsator"
-        app:layout_constraintTop_toTopOf="@id/pulsator" />
+        app:layout_constraintTop_toTopOf="@id/pulsator">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="1dp"
+            android:layout_marginBottom="1dp"
+            android:src="@drawable/ic_microphone_2" />
+    </FrameLayout>
 
     <View
         android:id="@+id/container_edit_text"
@@ -147,9 +154,9 @@
         android:id="@+id/btn_send"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:background="?attr/selectableItemBackground"
         android:elevation="@dimen/chatbot_control_panel_elevation"
         android:src="@drawable/ic_send"
+        android:background="@null"
         app:layout_constraintBottom_toBottomOf="@id/container_edit_text"
         app:layout_constraintEnd_toEndOf="@id/container_edit_text"
         app:layout_constraintTop_toTopOf="@id/container_edit_text" />

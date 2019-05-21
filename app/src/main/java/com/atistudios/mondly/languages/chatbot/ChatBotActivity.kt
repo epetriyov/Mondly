@@ -35,6 +35,7 @@ import com.atistudios.mondly.languages.chatbot.listeners.EndTextToSpeechCallback
 import com.atistudios.mondly.languages.chatbot.listeners.TransitionEndListener
 import jp.wasabeef.recyclerview.animators.BaseItemAnimator
 import kotlinx.android.synthetic.main.activity_chat.*
+import kotlinx.android.synthetic.main.view_chat_suggestion.*
 import kotlinx.android.synthetic.main.view_options_container.*
 import net.gotev.speech.Speech
 import java.util.*
@@ -449,14 +450,16 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         viewGroup.findViewById<TextView>(R.id.translation_suggestion).apply {
             text = suggestion.translation
         }
-        viewGroup.findViewById<ImageView>(R.id.btn_playback).apply {
+        viewGroup.findViewById<View>(R.id.btn_playback).apply {
             setOnClickListener {
                 if (it.tag == PLAYBACK_WAS_ALREADY_CLICKED) {
                     speak(suggestion.text, SPEAK_RATE_SLOWER)
                 } else {
                     it.tag = PLAYBACK_WAS_ALREADY_CLICKED
                     speak(suggestion.text)
-                    (drawable as AnimationDrawable).start()
+                    icon_playback.apply {
+                        (drawable as AnimationDrawable).start()
+                    }
                 }
                 viewGroup.findViewById<View>(R.id.text_suggestion)
                     .scaleAnimation(FIRST_SUGGESTION_SCALE_FACTOR, FIRST_SUGGESTION_SCALE_DURATION)
