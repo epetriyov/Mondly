@@ -77,7 +77,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         private const val SPEAK_RATE_SLOWER = 0.5F
         private const val MICROPHONE_START_ANIMATION_DELAY = 3600L
         private const val MICROPHONE_REPEAT_DURATION = 7000L
-        private const val SUGGESTIONS_SHOW_DELAY = 3000L
+        private const val SUGGESTIONS_SHOW_DELAY = 2000L
 
         // use this method to pass arguments in Activity
         fun buildIntent(context: Context, language: Locale, title: String): Intent {
