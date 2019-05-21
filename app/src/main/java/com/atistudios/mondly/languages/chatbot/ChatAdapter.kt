@@ -13,6 +13,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateInterpolator
 import androidx.core.view.ViewCompat
 import androidx.core.view.ViewPropertyAnimatorListener
 import androidx.core.view.isInvisible
@@ -110,6 +111,7 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
             )
                 .apply {
                     duration = ITEM_SLIDE_DURATION
+                    interpolator = AccelerateInterpolator()
                 }
             val alphaAnimator = ObjectAnimator.ofFloat(itemView, "alpha", 0F, 1F)
                 .apply {

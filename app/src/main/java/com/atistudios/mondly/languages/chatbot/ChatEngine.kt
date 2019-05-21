@@ -88,8 +88,6 @@ internal class ChatEngineImpl(
         }, BOT_MESSAGE_LOADING_DELAY)
         handler.postDelayed({
             chatListHelper.updateLastItem(botMessage.copy(isLoading = false))
-        }, BOT_MESSAGE_CONTENT_LOADING_DELAY)
-        handler.postDelayed({
             if (isAutoPlayEnabled) {
                 botMessage.text?.let {
                     chatView.speak(it, speakEndListener = object : EndTextToSpeechCallback() {
@@ -102,7 +100,7 @@ internal class ChatEngineImpl(
             } else {
                 showSuggestions(introAnimations)
             }
-        }, SHOW_SUGGESTIONS_LOADING_DELAY)
+        }, BOT_MESSAGE_CONTENT_LOADING_DELAY)
     }
 
     private fun showSuggestions(introAnimations: Boolean) {
