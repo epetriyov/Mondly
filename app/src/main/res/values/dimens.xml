@@ -8,4 +8,5 @@
     <dimen name="edit_group_margin">10dp</dimen>
     <dimen name="edit_group_left_margin">20dp</dimen>
     <dimen name="edit_group_right_margin">66dp</dimen>
+    <dimen name="text_top_margin">13dp</dimen>
 </resources>

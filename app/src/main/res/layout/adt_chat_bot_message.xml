@@ -7,7 +7,7 @@
     android:animateLayoutChanges="true"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:minHeight="77dp">
+    android:minHeight="78dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/img_constraint"
@@ -66,13 +66,14 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="100dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        >
 
         <TextView
             android:id="@+id/text_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="13dp"
             android:textColor="@color/black"
             android:textSize="21sp"
             app:layout_constraintStart_toStartOf="parent"
@@ -83,7 +84,6 @@
             android:id="@+id/text_message_translation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="13dp"
             android:textColor="@color/greyish_brown"
             android:textSize="17sp"
             app:layout_constraintBottom_toBottomOf="parent"

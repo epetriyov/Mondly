@@ -5,15 +5,14 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.transition.AutoTransition
 import android.transition.ChangeBounds
-import android.transition.Slide
 import android.transition.TransitionManager
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
+import androidx.constraintlayout.widget.ConstraintSet
+import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.core.view.ViewCompat
 import androidx.core.view.ViewPropertyAnimatorListener
 import androidx.core.view.isInvisible
@@ -28,6 +27,7 @@ import jp.wasabeef.recyclerview.animators.holder.AnimateViewHolder
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.adt_chat_bot_message.*
 import kotlinx.android.synthetic.main.adt_chat_user_message.*
+
 
 private const val ITEM_SLIDE_DURATION = 250L
 private const val TEXT_SCALE_DURATION = 250L
@@ -154,8 +154,23 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
                 }
             }
             img_bot_avatar.setImageResource(R.drawable.ic_emoji)
+            text_message_translation.animate().alpha(if (item.showTranslation && !item.isLoading) 1F else 0F)
             TransitionManager.beginDelayedTransition(message_container, ChangeBounds())
-            text_message_translation.isVisible = item.showTranslation && !item.isLoading
+            if (item.showTranslation) {
+                ConstraintSet()
+                    .apply {
+                        clone(message_container)
+                        clear(R.id.text_message, ConstraintSet.BOTTOM)
+                        applyTo(message_container)
+                    }
+            } else {
+                ConstraintSet()
+                    .apply {
+                        clone(message_container)
+                        connect(R.id.text_message, ConstraintSet.BOTTOM, PARENT_ID, ConstraintSet.BOTTOM, 0)
+                        applyTo(message_container)
+                    }
+            }
         }
     }
 
