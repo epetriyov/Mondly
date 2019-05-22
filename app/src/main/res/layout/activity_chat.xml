@@ -21,9 +21,9 @@
         android:layout_height="48dp"
         android:layout_marginStart="2dp"
         android:alpha="0.5"
+        android:background="@null"
         android:elevation="@dimen/chatbot_control_panel_elevation"
         android:src="@drawable/ic_close"
-        android:background="@null"
         app:layout_constraintBottom_toBottomOf="@id/toolbar"
         app:layout_constraintStart_toStartOf="@id/toolbar"
         app:layout_constraintTop_toTopOf="@id/toolbar" />
@@ -67,62 +67,53 @@
         layout="@layout/view_options_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
+        android:layout_marginStart="@dimen/edit_group_margin"
+        android:layout_marginEnd="@dimen/edit_group_margin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <View
-        android:id="@+id/container_edit_text"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/edit_text_group"
         android:layout_width="0dp"
         android:layout_height="36dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="66dp"
+        android:layout_marginStart="@dimen/edit_group_left_margin"
+        android:layout_marginEnd="@dimen/edit_group_right_margin"
         android:layout_marginBottom="12dp"
         android:background="@drawable/bg_edit_text"
         android:elevation="@dimen/chatbot_control_panel_elevation"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-         />
+        app:layout_constraintStart_toStartOf="parent">
 
-    <EditText
-        android:id="@+id/edit_answer"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="18dp"
-        android:layout_marginEnd="10dp"
-        android:background="@null"
-        android:elevation="@dimen/chatbot_control_panel_elevation"
-        android:hint="@string/chatbot_hint_edit_answer"
-        android:textColor="@color/white_50"
-        android:textSize="15sp"
-        app:layout_constraintBottom_toBottomOf="@id/container_edit_text"
-        app:layout_constraintEnd_toStartOf="@id/btn_send"
-        app:layout_constraintStart_toStartOf="@id/container_edit_text"
-        app:layout_constraintTop_toTopOf="@id/container_edit_text"
-        tools:text="@string/chatbot_hint_edit_answer" />
+        <EditText
+            android:id="@+id/edit_answer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="18dp"
+            android:layout_marginEnd="10dp"
+            android:background="@null"
+            android:elevation="@dimen/chatbot_control_panel_elevation"
+            android:hint="@string/chatbot_hint_edit_answer"
+            android:textColor="@color/white_50"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btn_send"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@string/chatbot_hint_edit_answer" />
 
-    <ImageButton
-        android:id="@+id/btn_send"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:elevation="@dimen/chatbot_control_panel_elevation"
-        android:src="@drawable/ic_send"
-        android:background="@null"
-        app:layout_constraintBottom_toBottomOf="@id/container_edit_text"
-        app:layout_constraintEnd_toEndOf="@id/container_edit_text"
-        app:layout_constraintTop_toTopOf="@id/container_edit_text" />
+        <ImageButton
+            android:id="@+id/btn_send"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@null"
+            android:elevation="@dimen/chatbot_control_panel_elevation"
+            android:src="@drawable/ic_send"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-
-
-    <androidx.constraintlayout.widget.Group
-        android:id="@+id/edit_text_group"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:constraint_referenced_ids="container_edit_text,edit_answer,btn_send"
-        tools:visibility="visible" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

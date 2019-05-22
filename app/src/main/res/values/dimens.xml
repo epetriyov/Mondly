@@ -4,4 +4,8 @@
     <dimen name="min_footer_height">285dp</dimen>
     <dimen name="max_footer_height">384dp</dimen>
     <dimen name="adt_user_views_width">166dp</dimen>
+    <dimen name="switches_height">98dp</dimen>
+    <dimen name="edit_group_margin">10dp</dimen>
+    <dimen name="edit_group_left_margin">20dp</dimen>
+    <dimen name="edit_group_right_margin">66dp</dimen>
 </resources>

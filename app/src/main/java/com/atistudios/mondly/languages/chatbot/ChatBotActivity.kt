@@ -1,6 +1,8 @@
 package com.atistudios.mondly.languages.chatbot
 
 import android.Manifest
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -18,6 +20,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isInvisible
@@ -124,8 +127,24 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
 
         KeyboardVisibilityEvent.setEventListener(this) {
             if (it) {
+                TransitionManager.beginDelayedTransition(motion_layout, ChangeBounds())
+                edit_text_group.layoutParams = (edit_text_group.layoutParams as ConstraintLayout.LayoutParams).apply {
+                    val margin = resources.getDimension(R.dimen.edit_group_margin).toInt()
+                    marginStart = margin
+                    marginEnd = margin
+                }
+                edit_text_group.translationY = 0F
                 bottom_container.alpha = 0F
             } else {
+                TransitionManager.beginDelayedTransition(motion_layout, ChangeBounds())
+                edit_text_group.layoutParams = (edit_text_group.layoutParams as ConstraintLayout.LayoutParams).apply {
+                    marginStart = resources.getDimension(R.dimen.edit_group_left_margin).toInt()
+                    marginEnd = resources.getDimension(R.dimen.edit_group_right_margin).toInt()
+                }
+                if (bottom_container.translationY == 0F) {
+                    // options group is visible
+                    edit_text_group.translationY = -resources.getDimension(R.dimen.switches_height)
+                }
                 bottom_container.animate().alpha(1F)
             }
         }
@@ -155,10 +174,28 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             )
         }
         btn_more_options.setOnClickListener {
-            TransitionManager.beginDelayedTransition(bottom_container)
-            options_group.isVisible = !options_group.isVisible
-            btn_more_options.alpha = if (options_group.isVisible) 1F else ALPHA_CONTROLS_DISABLED
-            updateFooterHeight()
+            val expand = edit_text_group.translationY == 0F
+            val editGroupTranslation =
+                ObjectAnimator.ofFloat(
+                    edit_text_group, "translationY", edit_text_group.translationY,
+                    if (edit_text_group.translationY == 0F) -resources.getDimension(R.dimen.switches_height) else 0F
+                )
+            val bottomPanelTranslation =
+                ObjectAnimator.ofFloat(
+                    bottom_container, "translationY", bottom_container.translationY,
+                    if (bottom_container.translationY == 0F) resources.getDimension(R.dimen.switches_height) else 0F
+                )
+            val optionsBtnAlpha =
+                ObjectAnimator.ofFloat(
+                    btn_more_options, "alpha", btn_more_options.alpha,
+                    if (btn_more_options.alpha == ALPHA_CONTROLS_DISABLED) 1F else ALPHA_CONTROLS_DISABLED
+                )
+            AnimatorSet()
+                .apply {
+                    play(editGroupTranslation).with(bottomPanelTranslation).with(optionsBtnAlpha)
+                    start()
+                }
+            updateFooterHeight(expand)
         }
         btn_change_input_type.setOnClickListener { controlModeClicked() }
         switch_auto_play.setOnCheckedChangeListener { _, isChecked -> chatEngine.onAutoPlayModeChanged(isChecked) }
@@ -171,7 +208,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             }
         })
         chatEngine.onChatOpened()
-        updateFooterHeight()
+        updateFooterHeight(false)
     }
 
     override fun onDestroy() {
@@ -306,7 +343,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         second_suggestion.isInvisible = true
         third_suggestion.isInvisible = true
         edit_text_group.isVisible = false
-        options_group.isVisible = false
+        bottom_container.translationY = resources.getDimension(R.dimen.switches_height)
         btn_more_options.alpha = ALPHA_CONTROLS_DISABLED
         setControlsEnabled(false)
         img_pulse_microphone.alpha = ALPHA_CONTROLS_DISABLED
@@ -398,7 +435,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                 .apply {
                     addTarget(btn_change_input_type)
                     addTarget(btn_microphone)
-                    addTarget(container_edit_text)
+                    addTarget(edit_text_group)
                     addTarget(edit_answer)
                     addTarget(btn_send)
                 })
@@ -523,11 +560,11 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         btn_microphone.scaleAnimation(MICROPHONE_SCALE_FACTOR, MICROPHONE_SCALE_DURATION, true)
     }
 
-    private fun updateFooterHeight() {
+    private fun updateFooterHeight(isBottomPanelExpanded: Boolean) {
         //dirty hardcoded height of bottom panel
         chatEngine.onFooterHeightChanged(
             resources.getDimension(
-                if (options_group.isVisible) R.dimen.max_footer_height else R.dimen.min_footer_height
+                if (isBottomPanelExpanded) R.dimen.max_footer_height else R.dimen.min_footer_height
             ).toInt()
         )
     }
