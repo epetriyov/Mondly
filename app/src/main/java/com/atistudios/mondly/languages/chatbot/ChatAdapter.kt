@@ -147,13 +147,14 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
             text_message_translation.text = item.translation
             loader_bot_message.isInvisible = !item.isLoading
             text_message.isInvisible = item.isLoading
-            text_message.setOnClickListener {
+            bg_img_bot_speaker.setOnClickListener {
                 if (!item.text.isNullOrEmpty()) {
                     text_message.scaleAnimation(TEXT_SCALE_FACTOR, TEXT_SCALE_DURATION)
                     botMessageClickListener.invoke(item.text)
                 }
             }
             img_bot_avatar.setImageResource(R.drawable.ic_emoji)
+            text_message_translation.alpha = if (item.showTranslation && !item.isLoading) 1F else 0F
             text_message_translation.animate().alpha(if (item.showTranslation && !item.isLoading) 1F else 0F)
             TransitionManager.beginDelayedTransition(message_container, ChangeBounds())
             if (item.showTranslation) {

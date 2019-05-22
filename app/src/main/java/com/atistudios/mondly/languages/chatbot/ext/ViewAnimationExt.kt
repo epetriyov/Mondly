@@ -29,14 +29,10 @@ fun View.scaleAnimation(scaleFactor: Float, duration: Long, twice: Boolean = fal
         }
 }
 
-fun View.slideDown(duration: Long) {
-    if (translationY == 0F) {
-        animate().translationY(height.toFloat()).duration = duration
-    }
+fun View.slideDown(duration: Long, translation: Float = height.toFloat()) {
+        animate().translationY(translation).duration = duration
 }
 
-fun View.slideUp(duration: Long) {
-    if (translationY > 0F) {
-        animate().translationY(0F).duration = duration
-    }
+fun View.slideUp(translation: Float,duration: Long) {
+        animate().translationY(translation).duration = duration
 }

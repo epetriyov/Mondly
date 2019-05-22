@@ -38,7 +38,6 @@ import com.atistudios.mondly.languages.chatbot.listeners.EndTextToSpeechCallback
 import com.atistudios.mondly.languages.chatbot.listeners.TransitionEndListener
 import jp.wasabeef.recyclerview.animators.BaseItemAnimator
 import kotlinx.android.synthetic.main.activity_chat.*
-import kotlinx.android.synthetic.main.view_chat_suggestion.*
 import kotlinx.android.synthetic.main.view_options_container.*
 import net.gotev.speech.Speech
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
@@ -68,6 +67,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         private val EXTRA_CHATBOT_TITLE = "extra_chatbot_title"
         private const val MY_PERMISSIONS_RECORD_AUDIO = 89
         private const val PLAYBACK_WAS_ALREADY_CLICKED = "pb_clicked_tag"
+        private const val TRANSLATED = "translated"
 
         private const val BOTTOM_PANEL_SLIDE_DURATION = 250L
         private const val MICROPHONE_SCALE_DURATION = 200L
@@ -174,7 +174,11 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             )
         }
         btn_more_options.setOnClickListener {
-            val expand = edit_text_group.translationY == 0F
+            if (bottom_container.translationY == 0F) {
+                bottom_container.tag = TRANSLATED
+            } else {
+                bottom_container.tag = null
+            }
             val editGroupTranslation =
                 ObjectAnimator.ofFloat(
                     edit_text_group, "translationY", edit_text_group.translationY,
@@ -195,7 +199,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                     play(editGroupTranslation).with(bottomPanelTranslation).with(optionsBtnAlpha)
                     start()
                 }
-            updateFooterHeight(expand)
+            updateFooterHeight(bottom_container.tag != TRANSLATED)
         }
         btn_change_input_type.setOnClickListener { controlModeClicked() }
         switch_auto_play.setOnCheckedChangeListener { _, isChecked -> chatEngine.onAutoPlayModeChanged(isChecked) }
@@ -208,7 +212,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             }
         })
         chatEngine.onChatOpened()
-        updateFooterHeight(false)
+        updateFooterHeight(bottom_container.tag != TRANSLATED)
     }
 
     override fun onDestroy() {
@@ -268,6 +272,19 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         first_suggestion.isInvisible = true
         second_suggestion.isInvisible = true
         third_suggestion.isInvisible = true
+        first_suggestion.findViewById<View>(R.id.btn_playback).apply {
+            tag = null
+            findViewById<ImageView>(R.id.icon_playback).setImageResource(R.drawable.ic_playback_animated)
+        }
+        second_suggestion.findViewById<View>(R.id.btn_playback).apply {
+            tag = null
+            findViewById<ImageView>(R.id.icon_playback).setImageResource(R.drawable.ic_playback_animated)
+        }
+        third_suggestion.findViewById<View>(R.id.btn_playback).apply {
+            tag = null
+            findViewById<ImageView>(R.id.icon_playback).setImageResource(R.drawable.ic_playback_animated)
+
+        }
     }
 
     override fun progressStateChanged(isLoading: Boolean) {
@@ -296,7 +313,14 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     if (newState == SCROLL_STATE_IDLE) {
                         if (recycler_view_chat_bot.canScrollVertically(-1)) {
-                            bottom_container.slideUp(BOTTOM_PANEL_SLIDE_DURATION)
+                            val translation =
+                                if (bottom_container.tag == TRANSLATED) resources.getDimension(
+                                    R.dimen.switches_height
+                                ) else 0F
+                            val editTranslation = if (bottom_container.tag == TRANSLATED) 0F else -resources.getDimension(
+                                R.dimen.switches_height)
+                            bottom_container.slideUp(translation, BOTTOM_PANEL_SLIDE_DURATION)
+                            edit_text_group.slideUp(editTranslation, BOTTOM_PANEL_SLIDE_DURATION)
                         }
                     }
                 }
@@ -311,6 +335,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                             ContextCompat.getColor(this@ChatBotActivity, android.R.color.transparent)
                         )
                         bottom_container.slideDown(BOTTOM_PANEL_SLIDE_DURATION)
+                        edit_text_group.slideDown(BOTTOM_PANEL_SLIDE_DURATION, bottom_container.height.toFloat())
                     } else if (dy != 0) {
                         toolbar.elevation = resources.getDimension(R.dimen.chatbot_control_panel_elevation)
                         toolbar.setBackgroundColor(
@@ -343,6 +368,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         second_suggestion.isInvisible = true
         third_suggestion.isInvisible = true
         edit_text_group.isVisible = false
+        bottom_container.tag = TRANSLATED
         bottom_container.translationY = resources.getDimension(R.dimen.switches_height)
         btn_more_options.alpha = ALPHA_CONTROLS_DISABLED
         setControlsEnabled(false)
@@ -506,7 +532,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                 } else {
                     it.tag = PLAYBACK_WAS_ALREADY_CLICKED
                     speak(suggestion.text)
-                    icon_playback.apply {
+                    findViewById<ImageView>(R.id.icon_playback).apply {
                         (drawable as AnimationDrawable).start()
                     }
                 }
@@ -529,14 +555,18 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                     slideEdge = Gravity.START
                     addListener(object : TransitionEndListener() {
                         override fun onTransitionEnd(transition: Transition?) {
-                            handler.postDelayed({
-                                speak(textToSpeak, speakEndListener = object : EndTextToSpeechCallback() {
-                                    override fun onCompleted() {
-                                        transitionEndListener?.let { it.onTransitionEnd(transition) }
-                                    }
+                            if (switch_auto_play.isChecked) {
+                                handler.postDelayed({
+                                    speak(textToSpeak, speakEndListener = object : EndTextToSpeechCallback() {
+                                        override fun onCompleted() {
+                                            transitionEndListener?.let { it.onTransitionEnd(transition) }
+                                        }
 
-                                })
-                            }, OPTION_SPEAK_DELAY)
+                                    })
+                                }, OPTION_SPEAK_DELAY)
+                            } else {
+                                transitionEndListener?.let { it.onTransitionEnd(transition) }
+                            }
                         }
 
                     })
