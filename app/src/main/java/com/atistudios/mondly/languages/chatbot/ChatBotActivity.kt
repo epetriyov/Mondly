@@ -38,6 +38,7 @@ import kotlinx.android.synthetic.main.activity_chat.*
 import kotlinx.android.synthetic.main.view_chat_suggestion.*
 import kotlinx.android.synthetic.main.view_options_container.*
 import net.gotev.speech.Speech
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import java.util.*
 
 
@@ -120,6 +121,15 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             }
         })
         initBottomPanel()
+
+        KeyboardVisibilityEvent.setEventListener(this) {
+            if (it) {
+                bottom_container.alpha = 0F
+            } else {
+                bottom_container.animate().alpha(1F)
+            }
+        }
+
         btn_microphone.setOnLongClickListener {
             checkPermission()
             return@setOnLongClickListener true
