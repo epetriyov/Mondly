@@ -5,6 +5,7 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.os.Handler
 import android.transition.ChangeBounds
 import android.transition.TransitionManager
 import android.view.LayoutInflater
@@ -147,7 +148,9 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
             text_message.text = item.text
             text_message_translation.text = item.translation
             loader_bot_message.isInvisible = !item.isLoading
-            text_message.isInvisible = item.isLoading
+            Handler().postDelayed({
+                text_message.isInvisible = item.isLoading
+            },200L)
             bg_img_bot_speaker.setOnClickListener {
                 img_bot_speaker.play {
                     if (!item.text.isNullOrEmpty()) {
@@ -157,8 +160,7 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
                 }
             }
             img_bot_avatar.setImageResource(R.drawable.ic_emoji)
-            text_message_translation.alpha = if (item.showTranslation && !item.isLoading) 1F else 0F
-            text_message_translation.animate().alpha(if (item.showTranslation && !item.isLoading) 1F else 0F)
+            text_message_translation.animate().scaleY(if (item.showTranslation && !item.isLoading) 1F else 0F)
             TransitionManager.beginDelayedTransition(message_container, ChangeBounds())
             if (item.showTranslation) {
                 ConstraintSet()
