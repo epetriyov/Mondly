@@ -120,25 +120,54 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
 
         KeyboardVisibilityEvent.setEventListener(this) {
             if (it) {
+                edit_text_group.translationY = 0F
+                val bottomTranslation = ObjectAnimator.ofFloat(
+                    bottom_container, "translationY",
+                    bottom_container.translationY, bottom_container.height.toFloat()
+                )
+                val bottomAlpha = ObjectAnimator.ofFloat(
+                    bottom_container, "alpha",
+                    bottom_container.alpha, 0F
+                )
+                AnimatorSet().apply {
+                    play(bottomTranslation).with(bottomAlpha)
+                    duration = BOTTOM_PANEL_SLIDE_DURATION
+                    start()
+                }
                 TransitionManager.beginDelayedTransition(motion_layout, ChangeBounds())
                 edit_text_group.layoutParams = (edit_text_group.layoutParams as ConstraintLayout.LayoutParams).apply {
                     val margin = resources.getDimension(R.dimen.edit_group_margin).toInt()
                     marginStart = margin
                     marginEnd = margin
                 }
-                edit_text_group.translationY = 0F
-                bottom_container.alpha = 0F
             } else {
+                val editTranslationValue =
+                    if (bottom_container.tag == TRANSLATED) 0F else -resources.getDimension(
+                        R.dimen.switches_height
+                    )
+                edit_text_group.translationY = editTranslationValue
+                val translation =
+                    if (bottom_container.tag == TRANSLATED) resources.getDimension(
+                        R.dimen.switches_height
+                    ) else 0F
+                val bottomTranslation = ObjectAnimator.ofFloat(
+                    bottom_container, "translationY",
+                    bottom_container.translationY, translation
+                )
+                val bottomAlpha = ObjectAnimator.ofFloat(
+                    bottom_container, "alpha",
+                    bottom_container.alpha, 1F
+                )
+                AnimatorSet().apply {
+                    play(bottomTranslation).with(bottomAlpha)
+                    duration = BOTTOM_PANEL_SLIDE_DURATION
+                    start()
+                }
                 TransitionManager.beginDelayedTransition(motion_layout, ChangeBounds())
                 edit_text_group.layoutParams = (edit_text_group.layoutParams as ConstraintLayout.LayoutParams).apply {
                     marginStart = resources.getDimension(R.dimen.edit_group_left_margin).toInt()
                     marginEnd = resources.getDimension(R.dimen.edit_group_right_margin).toInt()
                 }
-                if (bottom_container.translationY == 0F) {
-                    // options group is visible
-                    edit_text_group.translationY = -resources.getDimension(R.dimen.switches_height)
-                }
-                bottom_container.animate().alpha(1F)
             }
         }
 
