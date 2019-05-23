@@ -6,7 +6,6 @@ import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.text.Editable
@@ -29,10 +28,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE
-import com.atistudios.mondly.languages.chatbot.ext.hideKeyboard
-import com.atistudios.mondly.languages.chatbot.ext.scaleAnimation
-import com.atistudios.mondly.languages.chatbot.ext.slideDown
-import com.atistudios.mondly.languages.chatbot.ext.slideUp
+import com.atistudios.mondly.languages.chatbot.ext.*
 import com.atistudios.mondly.languages.chatbot.listeners.EndSpeechDelegate
 import com.atistudios.mondly.languages.chatbot.listeners.EndTextToSpeechCallback
 import com.atistudios.mondly.languages.chatbot.listeners.TransitionEndListener
@@ -66,22 +62,19 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         private val EXTRA_CHATBOT_LANGUAGE = "extra_chatbot_language"
         private val EXTRA_CHATBOT_TITLE = "extra_chatbot_title"
         private const val MY_PERMISSIONS_RECORD_AUDIO = 89
-        private const val PLAYBACK_WAS_ALREADY_CLICKED = "pb_clicked_tag"
         private const val TRANSLATED = "translated"
 
         private const val BOTTOM_PANEL_SLIDE_DURATION = 250L
         private const val MICROPHONE_SCALE_DURATION = 200L
         private const val MICROPHONE_SCALE_FACTOR = 1.2F
         private const val FIRST_SUGGESTION_SCALE_DURATION = 250L
-        private const val FIRST_SUGGESTION_SCALE_FACTOR = 1.05F
+        private const val FIRST_SUGGESTION_SCALE_FACTOR = 1.02F
         private const val ALPHA_CONTROLS_DISABLED = 0.5F
         private const val SEND_USER_ANSWER_DELAY = 250L
         private const val OPTION_SLIDE_DURATION = 250L
         private const val OPTION_SPEAK_DELAY = 200L
-        private const val SPEAK_RATE_SLOWER = 0.5F
         private const val MICROPHONE_START_ANIMATION_DELAY = 3600L
         private const val MICROPHONE_REPEAT_DURATION = 7000L
-        private const val SUGGESTIONS_SHOW_DELAY = 2000L
 
         // use this method to pass arguments in Activity
         fun buildIntent(context: Context, language: Locale, title: String): Intent {
@@ -110,8 +103,8 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         chatEngine = ChatEngineImpl(this, ChatListHelperImpl(), MockMessagesLoader(), handler)
         label_title.text = intent.getStringExtra(EXTRA_CHATBOT_TITLE) ?: getString(R.string.app_name)
         btn_close.setOnClickListener { finish() }
-        chatAdapter = ChatAdapter {
-            speak(it)
+        chatAdapter = ChatAdapter { message, rate ->
+            speak(message, rate)
         }
         initRecyclerView()
         chatAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
@@ -257,13 +250,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                 label_suggestions.isInvisible = false
             }
             setControlsEnabled(true)
-            handler.postDelayed({
-                showSuggestions(suggestions)
-            }, SUGGESTIONS_SHOW_DELAY)
-            handler.postDelayed({
-                microphoneBounceAnimation()
-                loopMicroPhoneAnimation()
-            }, MICROPHONE_START_ANIMATION_DELAY)
+            showSuggestions(suggestions)
         }
     }
 
@@ -317,8 +304,10 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                                 if (bottom_container.tag == TRANSLATED) resources.getDimension(
                                     R.dimen.switches_height
                                 ) else 0F
-                            val editTranslation = if (bottom_container.tag == TRANSLATED) 0F else -resources.getDimension(
-                                R.dimen.switches_height)
+                            val editTranslation =
+                                if (bottom_container.tag == TRANSLATED) 0F else -resources.getDimension(
+                                    R.dimen.switches_height
+                                )
                             bottom_container.slideUp(translation, BOTTOM_PANEL_SLIDE_DURATION)
                             edit_text_group.slideUp(editTranslation, BOTTOM_PANEL_SLIDE_DURATION)
                         }
@@ -504,6 +493,10 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                                     third_suggestion,
                                     object : TransitionEndListener() {
                                         override fun onTransitionEnd(transition: Transition?) {
+                                            handler.postDelayed({
+                                                microphoneBounceAnimation()
+                                                loopMicroPhoneAnimation()
+                                            }, MICROPHONE_START_ANIMATION_DELAY)
                                         }
 
                                     })
@@ -527,14 +520,8 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         }
         viewGroup.findViewById<View>(R.id.btn_playback).apply {
             setOnClickListener {
-                if (it.tag == PLAYBACK_WAS_ALREADY_CLICKED) {
-                    speak(suggestion.text, SPEAK_RATE_SLOWER)
-                } else {
-                    it.tag = PLAYBACK_WAS_ALREADY_CLICKED
-                    speak(suggestion.text)
-                    findViewById<ImageView>(R.id.icon_playback).apply {
-                        (drawable as AnimationDrawable).start()
-                    }
+                findViewById<ImageView>(R.id.icon_playback).play {
+                    speak(suggestion.text, it)
                 }
                 viewGroup.findViewById<View>(R.id.text_suggestion)
                     .scaleAnimation(FIRST_SUGGESTION_SCALE_FACTOR, FIRST_SUGGESTION_SCALE_DURATION)

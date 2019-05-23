@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.atistudios.mondly.languages.chatbot.ext.getScreenWidth
+import com.atistudios.mondly.languages.chatbot.ext.play
 import com.atistudios.mondly.languages.chatbot.ext.scaleAnimation
 import com.bumptech.glide.Glide
 import jp.wasabeef.recyclerview.animators.holder.AnimateViewHolder
@@ -34,7 +35,7 @@ private const val TEXT_SCALE_DURATION = 250L
 private const val TEXT_SCALE_FACTOR = 1.3F
 
 internal class ChatAdapter(
-    private val botMessageClickListener: ((message: String) -> Unit)?
+    private val botMessageClickListener: ((message: String, factor: Float) -> Unit)?
 ) :
     ListAdapter<ChatMessage, BaseViewHolder>(
         object : DiffUtil.ItemCallback<ChatMessage>() {
@@ -57,7 +58,7 @@ internal class ChatAdapter(
         return when (ItemViewType.values()[viewType]) {
             ItemViewType.BOT_MESSAGE_TYPE -> BaseViewHolder.BotMessageViewHolder(
                 layoutInflater.inflate(R.layout.adt_chat_bot_message, parent, false)
-            ) { botMessageClickListener?.invoke(it) }
+            ) { message, rate -> botMessageClickListener?.invoke(message, rate) }
             ItemViewType.USER_MESSAGE_TYPE -> BaseViewHolder.UserMessageViewHolder(
                 layoutInflater.inflate(R.layout.adt_chat_user_message, parent, false)
             )
@@ -93,7 +94,7 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
 
     class BotMessageViewHolder(
         containerView: View,
-        private val botMessageClickListener: (message: String) -> Unit?
+        private val botMessageClickListener: (message: String, rate: Float) -> Unit?
     ) :
         BaseViewHolder(containerView), AnimateViewHolder {
 
@@ -148,9 +149,11 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
             loader_bot_message.isInvisible = !item.isLoading
             text_message.isInvisible = item.isLoading
             bg_img_bot_speaker.setOnClickListener {
-                if (!item.text.isNullOrEmpty()) {
+                img_bot_speaker.play {
+                    if (!item.text.isNullOrEmpty()) {
+                        botMessageClickListener.invoke(item.text, it)
+                    }
                     text_message.scaleAnimation(TEXT_SCALE_FACTOR, TEXT_SCALE_DURATION)
-                    botMessageClickListener.invoke(item.text)
                 }
             }
             img_bot_avatar.setImageResource(R.drawable.ic_emoji)

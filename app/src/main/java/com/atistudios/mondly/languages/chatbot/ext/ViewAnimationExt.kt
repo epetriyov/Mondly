@@ -4,7 +4,9 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.graphics.drawable.AnimationDrawable
 import android.view.View
+import android.widget.ImageView
 
 
 fun View.scaleAnimation(scaleFactor: Float, duration: Long, twice: Boolean = false) {
@@ -30,9 +32,36 @@ fun View.scaleAnimation(scaleFactor: Float, duration: Long, twice: Boolean = fal
 }
 
 fun View.slideDown(duration: Long, translation: Float = height.toFloat()) {
-        animate().translationY(translation).duration = duration
+    animate().translationY(translation).duration = duration
 }
 
-fun View.slideUp(translation: Float,duration: Long) {
-        animate().translationY(translation).duration = duration
+fun View.slideUp(translation: Float, duration: Long) {
+    animate().translationY(translation).duration = duration
+}
+
+fun ImageView.play(callback: (rate: Float) -> Unit?) {
+    (drawable as AnimationDrawable).apply {
+        start()
+        setImageDrawable(reverseAnimation())
+    }
+    if (tag != null) {
+        tag = null
+        callback.invoke(0.5F)
+    } else {
+        tag = "PLAYBACK_WAS_ALREADY_CLICKED"
+        callback.invoke(1F)
+    }
+}
+
+private fun AnimationDrawable.reverseAnimation(): AnimationDrawable {
+    val newAnim = AnimationDrawable()
+    val numberOfFrame = numberOfFrames
+    for (i in 0 until numberOfFrame) {
+        newAnim.addFrame(
+            getFrame(numberOfFrame - i - 1),
+            getDuration(numberOfFrame - i - 1)
+        )
+    }
+    newAnim.isOneShot = true
+    return newAnim
 }
