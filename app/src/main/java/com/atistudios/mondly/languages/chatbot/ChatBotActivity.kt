@@ -168,9 +168,9 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             override fun afterTextChanged(s: Editable?) {}
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val alpha = if (s.isNullOrEmpty()) ALPHA_CONTROLS_DISABLED else 1F
-                btn_send.alpha = alpha
-                btn_clear.isVisible = (alpha == 1F)
+                btn_send.alpha = if (s.isNullOrEmpty()) ALPHA_CONTROLS_DISABLED else 1F
+                btn_clear.isVisible = !s.isNullOrEmpty()
+                btn_send.isEnabled = !s.isNullOrEmpty()
             }
         })
         chatEngine.onChatOpened()
@@ -455,6 +455,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         img_pulse_microphone.alpha = ALPHA_CONTROLS_DISABLED
         pulsator.isInvisible = true
         btn_send.alpha = ALPHA_CONTROLS_DISABLED
+        btn_send.isEnabled = false
     }
 
     private fun setControlsEnabled(enabled: Boolean) {
@@ -462,7 +463,6 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         edit_answer.isEnabled = enabled
         btn_microphone.isEnabled = enabled
         btn_microphone.alpha = alpha
-        btn_send.isEnabled = enabled
         btn_send.alpha = alpha
     }
 
