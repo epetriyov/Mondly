@@ -93,6 +93,8 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
 
     private var loopMicAnimation = true
 
+    private var disableListScrollHandle = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
@@ -109,67 +111,15 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         initRecyclerView()
         chatAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                recycler_view_chat_bot.layoutManager!!.smoothScrollToPosition(
-                    recycler_view_chat_bot,
-                    null,
-                    chatAdapter.itemCount
-                )
+                scrollChatToEnd()
+            }
+
+            override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
+                scrollChatToEnd()
             }
         })
         initBottomPanel()
-
-        KeyboardVisibilityEvent.setEventListener(this) {
-            if (it) {
-                edit_text_group.translationY = 0F
-                val bottomTranslation = ObjectAnimator.ofFloat(
-                    bottom_container, "translationY",
-                    bottom_container.translationY, bottom_container.height.toFloat()
-                )
-                val bottomAlpha = ObjectAnimator.ofFloat(
-                    bottom_container, "alpha",
-                    bottom_container.alpha, 0F
-                )
-                AnimatorSet().apply {
-                    play(bottomTranslation).with(bottomAlpha)
-                    duration = BOTTOM_PANEL_SLIDE_DURATION
-                    start()
-                }
-                TransitionManager.beginDelayedTransition(motion_layout, ChangeBounds())
-                edit_text_group.layoutParams = (edit_text_group.layoutParams as ConstraintLayout.LayoutParams).apply {
-                    val margin = resources.getDimension(R.dimen.edit_group_margin).toInt()
-                    marginStart = margin
-                    marginEnd = margin
-                }
-            } else {
-                val editTranslationValue =
-                    if (bottom_container.tag == TRANSLATED) 0F else -resources.getDimension(
-                        R.dimen.switches_height
-                    )
-                edit_text_group.translationY = editTranslationValue
-                val translation =
-                    if (bottom_container.tag == TRANSLATED) resources.getDimension(
-                        R.dimen.switches_height
-                    ) else 0F
-                val bottomTranslation = ObjectAnimator.ofFloat(
-                    bottom_container, "translationY",
-                    bottom_container.translationY, translation
-                )
-                val bottomAlpha = ObjectAnimator.ofFloat(
-                    bottom_container, "alpha",
-                    bottom_container.alpha, 1F
-                )
-                AnimatorSet().apply {
-                    play(bottomTranslation).with(bottomAlpha)
-                    duration = BOTTOM_PANEL_SLIDE_DURATION
-                    start()
-                }
-                TransitionManager.beginDelayedTransition(motion_layout, ChangeBounds())
-                edit_text_group.layoutParams = (edit_text_group.layoutParams as ConstraintLayout.LayoutParams).apply {
-                    marginStart = resources.getDimension(R.dimen.edit_group_left_margin).toInt()
-                    marginEnd = resources.getDimension(R.dimen.edit_group_right_margin).toInt()
-                }
-            }
-        }
+        handleKeyboardStateChanges()
 
         btn_microphone.setOnLongClickListener {
             checkPermission()
@@ -196,32 +146,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             )
         }
         btn_more_options.setOnClickListener {
-            if (bottom_container.translationY == 0F) {
-                bottom_container.tag = TRANSLATED
-            } else {
-                bottom_container.tag = null
-            }
-            val editGroupTranslation =
-                ObjectAnimator.ofFloat(
-                    edit_text_group, "translationY", edit_text_group.translationY,
-                    if (edit_text_group.translationY == 0F) -resources.getDimension(R.dimen.switches_height) else 0F
-                )
-            val bottomPanelTranslation =
-                ObjectAnimator.ofFloat(
-                    bottom_container, "translationY", bottom_container.translationY,
-                    if (bottom_container.translationY == 0F) resources.getDimension(R.dimen.switches_height) else 0F
-                )
-            val optionsBtnAlpha =
-                ObjectAnimator.ofFloat(
-                    btn_more_options, "alpha", btn_more_options.alpha,
-                    if (btn_more_options.alpha == ALPHA_CONTROLS_DISABLED) 1F else ALPHA_CONTROLS_DISABLED
-                )
-            AnimatorSet()
-                .apply {
-                    play(editGroupTranslation).with(bottomPanelTranslation).with(optionsBtnAlpha)
-                    start()
-                }
-            updateFooterHeight(bottom_container.tag != TRANSLATED)
+            moreOptionsClicked()
         }
         btn_change_input_type.setOnClickListener { controlModeClicked() }
         switch_auto_play.setOnCheckedChangeListener { _, isChecked -> chatEngine.onAutoPlayModeChanged(isChecked) }
@@ -278,7 +203,6 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             if (introAnimations) {
                 label_suggestions.isInvisible = false
             }
-            setControlsEnabled(true)
             showSuggestions(suggestions)
         }
     }
@@ -327,45 +251,145 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
 
 
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                    if (newState == SCROLL_STATE_IDLE) {
-                        if (recycler_view_chat_bot.canScrollVertically(-1)) {
-                            val translation =
-                                if (bottom_container.tag == TRANSLATED) resources.getDimension(
-                                    R.dimen.switches_height
-                                ) else 0F
-                            val editTranslation =
-                                if (bottom_container.tag == TRANSLATED) 0F else -resources.getDimension(
-                                    R.dimen.switches_height
-                                )
-                            bottom_container.slideUp(translation, BOTTOM_PANEL_SLIDE_DURATION)
-                            edit_text_group.slideUp(editTranslation, BOTTOM_PANEL_SLIDE_DURATION)
+                    if (!disableListScrollHandle) {
+                        if (newState == SCROLL_STATE_IDLE) {
+                            if (recycler_view_chat_bot.canScrollVertically(-1)) {
+                                val translation =
+                                    if (bottom_container.tag == TRANSLATED) resources.getDimension(
+                                        R.dimen.switches_height
+                                    ) else 0F
+                                val editTranslation =
+                                    if (bottom_container.tag == TRANSLATED) 0F else -resources.getDimension(
+                                        R.dimen.switches_height
+                                    )
+                                bottom_container.slideUp(translation, BOTTOM_PANEL_SLIDE_DURATION)
+                                edit_text_group.slideUp(editTranslation, BOTTOM_PANEL_SLIDE_DURATION)
+                            }
                         }
                     }
                 }
 
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    if (dy < 0 && recycler_view_chat_bot.canScrollVertically(1) && !recycler_view_chat_bot.canScrollVertically(
-                            -1
-                        )
-                    ) {
-                        toolbar.elevation = 0F
-                        toolbar.setBackgroundColor(
-                            ContextCompat.getColor(this@ChatBotActivity, android.R.color.transparent)
-                        )
-                        bottom_container.slideDown(BOTTOM_PANEL_SLIDE_DURATION)
-                        edit_text_group.slideDown(BOTTOM_PANEL_SLIDE_DURATION, bottom_container.height.toFloat())
-                    } else if (dy != 0) {
-                        toolbar.elevation = resources.getDimension(R.dimen.chatbot_control_panel_elevation)
-                        toolbar.setBackgroundColor(
-                            ContextCompat.getColor(
-                                this@ChatBotActivity,
-                                R.color.dusk_blue
+                    if (!disableListScrollHandle) {
+                        if (dy < 0 && recycler_view_chat_bot.canScrollVertically(1) && !recycler_view_chat_bot.canScrollVertically(
+                                -1
                             )
-                        )
+                        ) {
+                            toolbar.elevation = 0F
+                            toolbar.setBackgroundColor(
+                                ContextCompat.getColor(this@ChatBotActivity, android.R.color.transparent)
+                            )
+                            bottom_container.slideDown(BOTTOM_PANEL_SLIDE_DURATION)
+                            edit_text_group.slideDown(BOTTOM_PANEL_SLIDE_DURATION, bottom_container.height.toFloat())
+                        } else if (dy != 0) {
+                            toolbar.elevation = resources.getDimension(R.dimen.chatbot_control_panel_elevation)
+                            toolbar.setBackgroundColor(
+                                ContextCompat.getColor(
+                                    this@ChatBotActivity,
+                                    R.color.dusk_blue
+                                )
+                            )
+                        }
                     }
                 }
             })
         }
+    }
+
+    private fun handleKeyboardStateChanges() {
+        KeyboardVisibilityEvent.setEventListener(this) {
+            if (it) {
+                disableListScrollHandle = true
+                edit_text_group.translationY = 0F
+                val bottomTranslation = ObjectAnimator.ofFloat(
+                    bottom_container, "translationY",
+                    bottom_container.translationY, bottom_container.height.toFloat()
+                )
+                val bottomAlpha = ObjectAnimator.ofFloat(
+                    bottom_container, "alpha",
+                    bottom_container.alpha, 0F
+                )
+                AnimatorSet().apply {
+                    play(bottomTranslation).with(bottomAlpha)
+                    duration = BOTTOM_PANEL_SLIDE_DURATION
+                    start()
+                }
+                TransitionManager.beginDelayedTransition(motion_layout, ChangeBounds())
+                edit_text_group.layoutParams = (edit_text_group.layoutParams as ConstraintLayout.LayoutParams).apply {
+                    val margin = resources.getDimension(R.dimen.edit_group_margin).toInt()
+                    marginStart = margin
+                    marginEnd = margin
+                }
+                chatEngine.onFooterHeightChanged(edit_text_group.height)
+            } else {
+                disableListScrollHandle = false
+                val editTranslationValue =
+                    if (bottom_container.tag == TRANSLATED) 0F else -resources.getDimension(
+                        R.dimen.switches_height
+                    )
+                edit_text_group.translationY = editTranslationValue
+                val translation =
+                    if (bottom_container.tag == TRANSLATED) resources.getDimension(
+                        R.dimen.switches_height
+                    ) else 0F
+                val bottomTranslation = ObjectAnimator.ofFloat(
+                    bottom_container, "translationY",
+                    bottom_container.translationY, translation
+                )
+                val bottomAlpha = ObjectAnimator.ofFloat(
+                    bottom_container, "alpha",
+                    bottom_container.alpha, 1F
+                )
+                AnimatorSet().apply {
+                    play(bottomTranslation).with(bottomAlpha)
+                    duration = BOTTOM_PANEL_SLIDE_DURATION
+                    start()
+                }
+                TransitionManager.beginDelayedTransition(motion_layout, ChangeBounds())
+                edit_text_group.layoutParams = (edit_text_group.layoutParams as ConstraintLayout.LayoutParams).apply {
+                    marginStart = resources.getDimension(R.dimen.edit_group_left_margin).toInt()
+                    marginEnd = resources.getDimension(R.dimen.edit_group_right_margin).toInt()
+                }
+                updateFooterHeight(bottom_container.tag != TRANSLATED)
+            }
+        }
+    }
+
+    private fun moreOptionsClicked() {
+        if (bottom_container.translationY == 0F) {
+            bottom_container.tag = TRANSLATED
+        } else {
+            bottom_container.tag = null
+        }
+        val editGroupTranslation =
+            ObjectAnimator.ofFloat(
+                edit_text_group, "translationY", edit_text_group.translationY,
+                if (edit_text_group.translationY == 0F) -resources.getDimension(R.dimen.switches_height) else 0F
+            )
+        val bottomPanelTranslation =
+            ObjectAnimator.ofFloat(
+                bottom_container, "translationY", bottom_container.translationY,
+                if (bottom_container.translationY == 0F) resources.getDimension(R.dimen.switches_height) else 0F
+            )
+        val optionsBtnAlpha =
+            ObjectAnimator.ofFloat(
+                btn_more_options, "alpha", btn_more_options.alpha,
+                if (btn_more_options.alpha == ALPHA_CONTROLS_DISABLED) 1F else ALPHA_CONTROLS_DISABLED
+            )
+        AnimatorSet()
+            .apply {
+                play(editGroupTranslation).with(bottomPanelTranslation).with(optionsBtnAlpha)
+                start()
+            }
+        updateFooterHeight(bottom_container.tag != TRANSLATED)
+    }
+
+    private fun scrollChatToEnd() {
+        recycler_view_chat_bot.layoutManager!!.smoothScrollToPosition(
+            recycler_view_chat_bot,
+            null,
+            chatAdapter.itemCount
+        )
     }
 
     private fun initBottomPanel() {
@@ -397,6 +421,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
 
     private fun setControlsEnabled(enabled: Boolean) {
         val alpha = if (enabled) 1F else ALPHA_CONTROLS_DISABLED
+        edit_answer.isEnabled = enabled
         btn_microphone.isEnabled = enabled
         btn_microphone.alpha = alpha
         btn_send.isEnabled = enabled
@@ -522,6 +547,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                                     third_suggestion,
                                     object : TransitionEndListener() {
                                         override fun onTransitionEnd(transition: Transition?) {
+                                            setControlsEnabled(true)
                                             handler.postDelayed({
                                                 microphoneBounceAnimation()
                                                 loopMicroPhoneAnimation()
