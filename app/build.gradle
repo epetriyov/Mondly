@@ -43,6 +43,4 @@ dependencies {
     implementation 'jp.wasabeef:recyclerview-animators:3.0.0'
     // Customizable bouncing dots for smooth loading effect
     implementation 'com.eyalbira.loadingdots:loading-dots:1.0.2'
-    // Android library to handle software keyboard visibility change event
-    implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:2.3.0'
 }

@@ -29,6 +29,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE
 import com.atistudios.mondly.languages.chatbot.ext.*
+import com.atistudios.mondly.languages.chatbot.keyboard.KeyboardHeightObserver
+import com.atistudios.mondly.languages.chatbot.keyboard.KeyboardHeightProvider
 import com.atistudios.mondly.languages.chatbot.listeners.EndSpeechDelegate
 import com.atistudios.mondly.languages.chatbot.listeners.EndTextToSpeechCallback
 import com.atistudios.mondly.languages.chatbot.listeners.TransitionEndListener
@@ -36,7 +38,6 @@ import jp.wasabeef.recyclerview.animators.BaseItemAnimator
 import kotlinx.android.synthetic.main.activity_chat.*
 import kotlinx.android.synthetic.main.view_options_container.*
 import net.gotev.speech.Speech
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import java.util.*
 
 
@@ -91,6 +92,8 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
 
     private lateinit var chatEngine: ChatEngine
 
+    private lateinit var keyboardHeightProvider: KeyboardHeightProvider
+
     private var loopMicAnimation = true
 
     private var disableListScrollHandle = false
@@ -98,6 +101,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
+        keyboardHeightProvider = KeyboardHeightProvider(this)
         val chatLanguage = (intent.getSerializableExtra(EXTRA_CHATBOT_LANGUAGE) as? Locale) ?: Locale.getDefault()
         Speech.init(this, packageName).apply {
             setLocale(chatLanguage)
@@ -119,7 +123,6 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             }
         })
         initBottomPanel()
-        handleKeyboardStateChanges()
 
         btn_microphone.setOnLongClickListener {
             checkPermission()
@@ -162,11 +165,30 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         updateFooterHeight(bottom_container.tag != TRANSLATED)
     }
 
+    override fun onPause() {
+        super.onPause()
+        keyboardHeightProvider.setKeyboardHeightObserver(null)
+        onKeyboardHidden()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        keyboardHeightProvider.setKeyboardHeightObserver(object : KeyboardHeightObserver {
+            override fun onKeyboardHeightChanged(height: Int, orientation: Int) {
+                handleKeyboardStateChanges(height)
+            }
+        })
+        handler.post {
+            keyboardHeightProvider.start()
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         chatEngine.onDestroy()
         Speech.getInstance().shutdown()
         handler.removeCallbacksAndMessages(null)
+        keyboardHeightProvider.close()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
@@ -296,63 +318,62 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         }
     }
 
-    private fun handleKeyboardStateChanges() {
-        KeyboardVisibilityEvent.setEventListener(this) {
-            if (it) {
-                disableListScrollHandle = true
-                edit_text_group.translationY = 0F
-                val bottomTranslation = ObjectAnimator.ofFloat(
-                    bottom_container, "translationY",
-                    bottom_container.translationY, bottom_container.height.toFloat()
-                )
-                val bottomAlpha = ObjectAnimator.ofFloat(
-                    bottom_container, "alpha",
-                    bottom_container.alpha, 0F
-                )
-                AnimatorSet().apply {
-                    play(bottomTranslation).with(bottomAlpha)
-                    duration = BOTTOM_PANEL_SLIDE_DURATION
-                    start()
-                }
-                TransitionManager.beginDelayedTransition(motion_layout, ChangeBounds())
-                edit_text_group.layoutParams = (edit_text_group.layoutParams as ConstraintLayout.LayoutParams).apply {
-                    val margin = resources.getDimension(R.dimen.edit_group_margin).toInt()
-                    marginStart = margin
-                    marginEnd = margin
-                }
-                chatEngine.onFooterHeightChanged(edit_text_group.height)
-            } else {
-                disableListScrollHandle = false
-                val editTranslationValue =
-                    if (bottom_container.tag == TRANSLATED) 0F else -resources.getDimension(
-                        R.dimen.switches_height
-                    )
-                edit_text_group.translationY = editTranslationValue
-                val translation =
-                    if (bottom_container.tag == TRANSLATED) resources.getDimension(
-                        R.dimen.switches_height
-                    ) else 0F
-                val bottomTranslation = ObjectAnimator.ofFloat(
-                    bottom_container, "translationY",
-                    bottom_container.translationY, translation
-                )
-                val bottomAlpha = ObjectAnimator.ofFloat(
-                    bottom_container, "alpha",
-                    bottom_container.alpha, 1F
-                )
-                AnimatorSet().apply {
-                    play(bottomTranslation).with(bottomAlpha)
-                    duration = BOTTOM_PANEL_SLIDE_DURATION
-                    start()
-                }
-                TransitionManager.beginDelayedTransition(motion_layout, ChangeBounds())
-                edit_text_group.layoutParams = (edit_text_group.layoutParams as ConstraintLayout.LayoutParams).apply {
-                    marginStart = resources.getDimension(R.dimen.edit_group_left_margin).toInt()
-                    marginEnd = resources.getDimension(R.dimen.edit_group_right_margin).toInt()
-                }
-                updateFooterHeight(bottom_container.tag != TRANSLATED)
+    private fun handleKeyboardStateChanges(height: Int) {
+        if (height > 0) {
+            disableListScrollHandle = true
+            edit_text_group.translationY = 0F
+            val bottomAlpha = ObjectAnimator.ofFloat(
+                bottom_container, "alpha",
+                bottom_container.alpha, 0F
+            )
+            val editTranslation = ObjectAnimator.ofFloat(
+                edit_text_group, "translationY",
+                edit_text_group.translationY, -(height.toFloat()
+//                        + edit_text_group.height + resources.getDimension(R.dimen.text_top_margin)
+                        )
+            )
+            AnimatorSet().apply {
+                play(bottomAlpha).with(editTranslation)
+                duration = BOTTOM_PANEL_SLIDE_DURATION
+                start()
             }
+            TransitionManager.beginDelayedTransition(motion_layout, ChangeBounds())
+            edit_text_group.layoutParams = (edit_text_group.layoutParams as ConstraintLayout.LayoutParams).apply {
+                val margin = resources.getDimension(R.dimen.edit_group_margin).toInt()
+                marginStart = margin
+                marginEnd = margin
+            }
+            chatEngine.onFooterHeightChanged(edit_text_group.height)
+        } else {
+            onKeyboardHidden()
         }
+    }
+
+    private fun onKeyboardHidden() {
+        disableListScrollHandle = false
+        val editTranslationValue =
+            if (bottom_container.tag == TRANSLATED) 0F else -resources.getDimension(
+                R.dimen.switches_height
+            )
+        val editTranslation = ObjectAnimator.ofFloat(
+            edit_text_group, "translationY",
+            edit_text_group.translationY, editTranslationValue
+        )
+        val bottomAlpha = ObjectAnimator.ofFloat(
+            bottom_container, "alpha",
+            bottom_container.alpha, 1F
+        )
+        AnimatorSet().apply {
+            play(bottomAlpha).with(editTranslation)
+            duration = BOTTOM_PANEL_SLIDE_DURATION
+            start()
+        }
+        TransitionManager.beginDelayedTransition(motion_layout, ChangeBounds())
+        edit_text_group.layoutParams = (edit_text_group.layoutParams as ConstraintLayout.LayoutParams).apply {
+            marginStart = resources.getDimension(R.dimen.edit_group_left_margin).toInt()
+            marginEnd = resources.getDimension(R.dimen.edit_group_right_margin).toInt()
+        }
+        updateFooterHeight(bottom_container.tag != TRANSLATED)
     }
 
     private fun moreOptionsClicked() {
