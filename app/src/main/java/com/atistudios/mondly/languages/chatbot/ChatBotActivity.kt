@@ -86,6 +86,12 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         }
     }
 
+    private val loopMicroRunner = Runnable {
+        if (loopMicAnimation) {
+            microphoneBounceAnimation()
+            loopMicroPhoneAnimation()
+        }
+    }
     private val handler = Handler()
 
     private lateinit var chatAdapter: ChatAdapter
@@ -141,6 +147,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             hideKeyboard(edit_answer)
             handler.postDelayed(
                 {
+                    loopMicAnimation = false
                     setControlsEnabled(false)
                     chatEngine.onUserAnswered(edit_answer.text.toString(), true)
                     edit_answer.text = null
@@ -219,8 +226,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         suggestions: Triple<ResponseSuggestion, ResponseSuggestion, ResponseSuggestion>,
         introAnimations: Boolean
     ) {
-        loopMicAnimation = true
-        handler.post {
+        if (introAnimations) {
             TransitionManager.beginDelayedTransition(
                 bottom_container, AutoTransition().addListener(
                     object : TransitionEndListener() {
@@ -229,9 +235,9 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                         }
                     })
             )
-            if (introAnimations) {
-                label_suggestions.isInvisible = false
-            }
+            label_suggestions.isInvisible = false
+        } else {
+            showSuggestions(suggestions)
         }
     }
 
@@ -488,6 +494,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
 
     private fun speakStarted() {
         loopMicAnimation = false
+        handler.removeCallbacks(loopMicroRunner)
         handler.post {
             TransitionManager.go(Scene(bottom_container), AutoTransition()
                 .apply {
@@ -578,6 +585,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                                             TransitionManager.beginDelayedTransition(bottom_container)
                                             setControlsEnabled(true)
                                             handler.postDelayed({
+                                                loopMicAnimation = true
                                                 microphoneBounceAnimation()
                                                 loopMicroPhoneAnimation()
                                             }, MICROPHONE_START_ANIMATION_DELAY)
@@ -648,12 +656,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
 
     private fun loopMicroPhoneAnimation() {
         if (loopMicAnimation) {
-            handler.postDelayed({
-                if (loopMicAnimation) {
-                    microphoneBounceAnimation()
-                    loopMicroPhoneAnimation()
-                }
-            }, MICROPHONE_REPEAT_DURATION)
+            handler.postDelayed(loopMicroRunner, MICROPHONE_REPEAT_DURATION)
         }
     }
 
