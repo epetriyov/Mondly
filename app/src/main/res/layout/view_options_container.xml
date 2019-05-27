@@ -5,7 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_control_panel"
-    android:elevation="@dimen/chatbot_control_panel_elevation">
+    android:elevation="@dimen/chatbot_control_panel_elevation"
+    android:clickable="true"
+    android:focusable="true"
+    >
 
     <Space
         android:id="@+id/panel_top_space"
