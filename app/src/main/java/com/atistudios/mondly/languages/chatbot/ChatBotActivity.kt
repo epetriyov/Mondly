@@ -221,11 +221,17 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     ) {
         loopMicAnimation = true
         handler.post {
-            TransitionManager.beginDelayedTransition(bottom_container)
+            TransitionManager.beginDelayedTransition(
+                bottom_container, AutoTransition().addListener(
+                    object : TransitionEndListener() {
+                        override fun onTransitionEnd(transition: Transition?) {
+                            showSuggestions(suggestions)
+                        }
+                    })
+            )
             if (introAnimations) {
                 label_suggestions.isInvisible = false
             }
-            showSuggestions(suggestions)
         }
     }
 
@@ -343,7 +349,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                 marginStart = margin
                 marginEnd = margin
             }
-            chatEngine.onFooterHeightChanged(edit_text_group.height)
+            chatEngine.onFooterHeightChanged(edit_text_group.height + height)
         } else {
             onKeyboardHidden()
         }
@@ -569,6 +575,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                                     third_suggestion,
                                     object : TransitionEndListener() {
                                         override fun onTransitionEnd(transition: Transition?) {
+                                            TransitionManager.beginDelayedTransition(bottom_container)
                                             setControlsEnabled(true)
                                             handler.postDelayed({
                                                 microphoneBounceAnimation()
