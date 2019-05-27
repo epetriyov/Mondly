@@ -155,6 +155,9 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                 SEND_USER_ANSWER_DELAY
             )
         }
+        btn_clear.setOnClickListener {
+            edit_answer.text = null
+        }
         btn_more_options.setOnClickListener {
             moreOptionsClicked()
         }
@@ -165,7 +168,9 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             override fun afterTextChanged(s: Editable?) {}
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                btn_send.alpha = if (s.isNullOrEmpty()) ALPHA_CONTROLS_DISABLED else 1F
+                val alpha = if (s.isNullOrEmpty()) ALPHA_CONTROLS_DISABLED else 1F
+                btn_send.alpha = alpha
+                btn_clear.isVisible = (alpha == 1F)
             }
         })
         chatEngine.onChatOpened()
