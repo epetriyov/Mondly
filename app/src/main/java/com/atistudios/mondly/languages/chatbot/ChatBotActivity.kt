@@ -425,6 +425,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         btn_microphone.isEnabled = enabled
         btn_microphone.alpha = alpha
         btn_send.isEnabled = enabled
+        btn_send.alpha = alpha
     }
 
     private fun checkPermission() {
