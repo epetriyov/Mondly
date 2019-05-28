@@ -31,7 +31,7 @@
             android:layout_width="26dp"
             android:layout_height="26dp"
             android:layout_marginStart="35dp"
-            android:background="@drawable/btn_microphone"
+            android:background="@drawable/bg_mic_not_selected"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             tools:visibility="visible" />

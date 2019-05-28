@@ -76,6 +76,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         private const val OPTION_SPEAK_DELAY = 200L
         private const val MICROPHONE_START_ANIMATION_DELAY = 3600L
         private const val MICROPHONE_REPEAT_DURATION = 7000L
+        private const val BOTTOM_PANEL_ALPHA_DURATION = 300L
 
         // use this method to pass arguments in Activity
         fun buildIntent(context: Context, language: Locale, title: String): Intent {
@@ -160,6 +161,16 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         }
         btn_more_options.setOnClickListener {
             moreOptionsClicked()
+        }
+        recycler_view_chat_bot.setOnTouchListener { v, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                val botMessage = recycler_view_chat_bot.findChildViewUnder(event.x, event.y)
+                    ?.findViewById<View>(R.id.container_message)
+                if (botMessage == null || botMessage.getLocationOnScreen().x + botMessage.width < event.x) {
+                    hideKeyboard(edit_answer)
+                }
+            }
+            false
         }
         btn_change_input_type.setOnClickListener { controlModeClicked() }
         switch_auto_play.setOnCheckedChangeListener { _, isChecked -> chatEngine.onAutoPlayModeChanged(isChecked) }
@@ -342,16 +353,17 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             val bottomAlpha = ObjectAnimator.ofFloat(
                 bottom_container, "alpha",
                 bottom_container.alpha, 0F
-            )
+            ).apply {
+                duration = BOTTOM_PANEL_ALPHA_DURATION
+            }
             val editTranslation = ObjectAnimator.ofFloat(
                 edit_text_group, "translationY",
-                edit_text_group.translationY, -(height.toFloat()
-//                        + edit_text_group.height + resources.getDimension(R.dimen.text_top_margin)
-                        )
-            )
+                edit_text_group.translationY, -(height.toFloat())
+            ).apply {
+                duration = BOTTOM_PANEL_SLIDE_DURATION
+            }
             AnimatorSet().apply {
                 play(bottomAlpha).with(editTranslation)
-                duration = BOTTOM_PANEL_SLIDE_DURATION
                 start()
             }
             TransitionManager.beginDelayedTransition(motion_layout, ChangeBounds())
@@ -375,14 +387,17 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         val editTranslation = ObjectAnimator.ofFloat(
             edit_text_group, "translationY",
             edit_text_group.translationY, editTranslationValue
-        )
+        ).apply {
+            duration = BOTTOM_PANEL_SLIDE_DURATION
+        }
         val bottomAlpha = ObjectAnimator.ofFloat(
             bottom_container, "alpha",
             bottom_container.alpha, 1F
-        )
+        ).apply {
+            duration = BOTTOM_PANEL_ALPHA_DURATION
+        }
         AnimatorSet().apply {
             play(bottomAlpha).with(editTranslation)
-            duration = BOTTOM_PANEL_SLIDE_DURATION
             start()
         }
         TransitionManager.beginDelayedTransition(motion_layout, ChangeBounds())
@@ -604,26 +619,36 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     }
 
     private fun bindSuggestion(viewGroup: ViewGroup, suggestion: ResponseSuggestion) {
-        viewGroup.findViewById<ImageView>(R.id.image_message).apply {
-            if (suggestion.icon != null) {
-                setImageResource(suggestion.icon)
-            }
-        }
-        viewGroup.findViewById<TextView>(R.id.text_suggestion).apply {
-            text = suggestion.text
-        }
-        viewGroup.findViewById<TextView>(R.id.translation_suggestion).apply {
-            text = suggestion.translation
-        }
-        viewGroup.findViewById<View>(R.id.btn_playback).apply {
-            setOnClickListener {
-                findViewById<ImageView>(R.id.icon_playback).play {
-                    speak(suggestion.text, it)
+        viewGroup.apply {
+            findViewById<ImageView>(R.id.image_message).apply {
+                if (suggestion.icon != null) {
+                    setImageResource(suggestion.icon)
                 }
-                viewGroup.findViewById<View>(R.id.text_suggestion)
-                    .scaleAnimation(FIRST_SUGGESTION_SCALE_FACTOR, FIRST_SUGGESTION_SCALE_DURATION)
+            }
+            findViewById<TextView>(R.id.text_suggestion).apply {
+                text = suggestion.text
+                setOnClickListener {
+                    onOptionClicked(viewGroup, suggestion.text)
+                }
+            }
+            findViewById<TextView>(R.id.translation_suggestion).apply {
+                text = suggestion.translation
+                setOnClickListener {
+                    onOptionClicked(viewGroup, suggestion.text)
+                }
+            }
+            findViewById<View>(R.id.btn_playback).setOnClickListener {
+                onOptionClicked(viewGroup, suggestion.text)
             }
         }
+    }
+
+    private fun onOptionClicked(viewGroup: ViewGroup, suggestion: String) {
+        viewGroup.findViewById<ImageView>(R.id.icon_playback).play {
+            speak(suggestion, it)
+        }
+        viewGroup.findViewById<View>(R.id.text_suggestion)
+            .scaleAnimation(FIRST_SUGGESTION_SCALE_FACTOR, FIRST_SUGGESTION_SCALE_DURATION)
     }
 
     private fun showSuggestion(

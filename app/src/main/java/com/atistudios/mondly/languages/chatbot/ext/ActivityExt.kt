@@ -18,3 +18,9 @@ fun Activity.getScreenWidth(): Int {
     windowManager.defaultDisplay.getSize(point)
     return point.x
 }
+
+fun View.getLocationOnScreen(): Point {
+    val location = IntArray(2)
+    this.getLocationOnScreen(location)
+    return Point(location[0], location[1])
+}
