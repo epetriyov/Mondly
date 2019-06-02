@@ -145,10 +145,10 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             false
         }
         btn_send.setOnClickListener {
+            cancelMicLooper()
             hideKeyboard(edit_answer)
             handler.postDelayed(
                 {
-                    cancelMicLooper()
                     setControlsEnabled(false)
                     chatEngine.onUserAnswered(edit_answer.text.toString(), true)
                     edit_answer.text = null
