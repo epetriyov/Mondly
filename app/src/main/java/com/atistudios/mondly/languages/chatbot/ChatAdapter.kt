@@ -153,14 +153,12 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
             loader_bot_message.isInvisible = !item.isLoading
             Handler().postDelayed({
                 text_message.isInvisible = item.isLoading
-            },200L)
+            }, 200L)
+            container_message.setOnClickListener {
+                onItemClicked(item.text)
+            }
             bg_img_bot_speaker.setOnClickListener {
-                img_bot_speaker.play {
-                    if (!item.text.isNullOrEmpty()) {
-                        botMessageClickListener.invoke(item.text, it)
-                    }
-                    text_message.scaleAnimation(TEXT_SCALE_FACTOR, TEXT_SCALE_DURATION)
-                }
+                onItemClicked(item.text)
             }
             img_bot_avatar.setImageResource(R.drawable.ic_emoji)
             text_message_translation.animate().scaleY(if (item.showTranslation && !item.isLoading) 1F else 0F)
@@ -179,6 +177,15 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
                         connect(R.id.text_message, ConstraintSet.BOTTOM, PARENT_ID, ConstraintSet.BOTTOM, 0)
                         applyTo(message_container)
                     }
+            }
+        }
+
+        private fun onItemClicked(text: String?) {
+            img_bot_speaker.play {
+                if (!text.isNullOrEmpty()) {
+                    botMessageClickListener.invoke(text, it)
+                }
+                text_message.scaleAnimation(TEXT_SCALE_FACTOR, TEXT_SCALE_DURATION)
             }
         }
     }
