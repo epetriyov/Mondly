@@ -30,7 +30,7 @@ class MockMessagesLoader : MessagesLoader {
         messageCounter++
         return ChatMessage.BotMessage(
             messageCounter.toString(),
-            "test",
+            "very looooooooong text",
             "test",
             true,
             showTranslation = areTranslationsVisible

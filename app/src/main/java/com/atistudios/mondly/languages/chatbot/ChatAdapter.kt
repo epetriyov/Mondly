@@ -6,7 +6,6 @@ import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Handler
-import android.transition.ChangeBounds
 import android.transition.TransitionManager
 import android.view.LayoutInflater
 import android.view.View
@@ -35,6 +34,7 @@ private const val ITEM_SLIDE_DURATION = 250L
 private const val ALPHA_SLIDE_DURATION = 500L
 private const val TEXT_SCALE_DURATION = 250L
 private const val TEXT_SCALE_FACTOR = 1.3F
+private const val DELAY_FOR_FIXING_OVERLAPPING_WITH_PROGRESS = 300L
 
 internal class ChatAdapter(
     private val botMessageClickListener: ((message: String, factor: Float) -> Unit)?
@@ -100,6 +100,13 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
     ) :
         BaseViewHolder(containerView), AnimateViewHolder {
 
+        init {
+            // ugly hack to limit max width of user message TextView
+            text_message.maxWidth =
+                (containerView.context as Activity).getScreenWidth() -
+                        containerView.context.resources.getDimension(R.dimen.adt_chat_views_width).toInt()
+        }
+
         override fun preAnimateAddImpl(holder: RecyclerView.ViewHolder) {
             holder.itemView.alpha = 0F
             img_constraint.translationX = -img_constraint.width.toFloat()
@@ -149,12 +156,28 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
         override fun animateRemoveImpl(holder: RecyclerView.ViewHolder, listener: ViewPropertyAnimatorListener?) {}
 
         fun bindView(item: ChatMessage.BotMessage) {
-            text_message.text = item.text
-            text_message_translation.text = item.translation
             loader_bot_message.isInvisible = !item.isLoading
             Handler().postDelayed({
-                text_message.isInvisible = item.isLoading
-            }, 200L)
+                TransitionManager.beginDelayedTransition(message_container)
+                text_message.isVisible = !item.isLoading
+                text_message.text = item.text
+                text_message_translation.text = item.translation
+                if (item.showTranslation) {
+                    ConstraintSet()
+                        .apply {
+                            clone(message_container)
+                            clear(R.id.text_message, ConstraintSet.BOTTOM)
+                            applyTo(message_container)
+                        }
+                } else {
+                    ConstraintSet()
+                        .apply {
+                            clone(message_container)
+                            connect(R.id.text_message, ConstraintSet.BOTTOM, PARENT_ID, ConstraintSet.BOTTOM, 0)
+                            applyTo(message_container)
+                        }
+                }
+            }, DELAY_FOR_FIXING_OVERLAPPING_WITH_PROGRESS)
             container_message.setOnClickListener {
                 onItemClicked(item.text)
             }
@@ -163,22 +186,6 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
             }
             img_bot_avatar.setImageResource(R.drawable.ic_emoji)
             text_message_translation.animate().scaleY(if (item.showTranslation && !item.isLoading) 1F else 0F)
-            TransitionManager.beginDelayedTransition(message_container, ChangeBounds())
-            if (item.showTranslation) {
-                ConstraintSet()
-                    .apply {
-                        clone(message_container)
-                        clear(R.id.text_message, ConstraintSet.BOTTOM)
-                        applyTo(message_container)
-                    }
-            } else {
-                ConstraintSet()
-                    .apply {
-                        clone(message_container)
-                        connect(R.id.text_message, ConstraintSet.BOTTOM, PARENT_ID, ConstraintSet.BOTTOM, 0)
-                        applyTo(message_container)
-                    }
-            }
         }
 
         private fun onItemClicked(text: String?) {
