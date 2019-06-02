@@ -74,9 +74,13 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         private const val SEND_USER_ANSWER_DELAY = 250L
         private const val OPTION_SLIDE_DURATION = 250L
         private const val OPTION_SPEAK_DELAY = 200L
-        private const val MICROPHONE_START_ANIMATION_DELAY = 3600L
         private const val MICROPHONE_REPEAT_DURATION = 7000L
         private const val BOTTOM_PANEL_ALPHA_DURATION = 300L
+        private const val FIRST_SUGGESTION_DELAY = 0L
+        private const val SECOND_SUGGESTION_DELAY = 1000L
+        private const val THIRD_SUGGESTION_DELAY = 2000L
+        private const val CONTROLS_ENABLE_DELAY = 2700L
+        private const val MIC_ANIMATION_DELAY = 6000L
 
         // use this method to pass arguments in Activity
         fun buildIntent(context: Context, language: Locale, title: String): Intent {
@@ -590,31 +594,18 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         bindSuggestion(first_suggestion as ViewGroup, suggestions.first)
         bindSuggestion(second_suggestion as ViewGroup, suggestions.second)
         bindSuggestion(third_suggestion as ViewGroup, suggestions.third)
-        showSuggestion(suggestions.first.text, first_suggestion,
-            object : TransitionEndListener() {
-                override fun onTransitionFinished(transition: Transition) {
-                    showSuggestion(suggestions.second.text, second_suggestion,
-                        object : TransitionEndListener() {
-                            override fun onTransitionFinished(transition: Transition) {
-                                showSuggestion(
-                                    suggestions.third.text,
-                                    third_suggestion,
-                                    object : TransitionEndListener() {
-                                        override fun onTransitionFinished(transition: Transition) {
-                                            TransitionManager.beginDelayedTransition(bottom_container)
-                                            setControlsEnabled(true)
-                                            handler.postDelayed({
-                                                loopMicAnimation = true
-                                                microphoneBounceAnimation()
-                                                loopMicroPhoneAnimation()
-                                            }, MICROPHONE_START_ANIMATION_DELAY)
-                                        }
-
-                                    })
-                            }
-                        })
-                }
-            })
+        showSuggestion(suggestions.first.text, first_suggestion, FIRST_SUGGESTION_DELAY)
+        showSuggestion(suggestions.second.text, second_suggestion, SECOND_SUGGESTION_DELAY)
+        showSuggestion(suggestions.third.text, third_suggestion, THIRD_SUGGESTION_DELAY)
+        handler.postDelayed({
+            TransitionManager.beginDelayedTransition(bottom_container)
+            setControlsEnabled(true)
+        }, CONTROLS_ENABLE_DELAY)
+        handler.postDelayed({
+            loopMicAnimation = true
+            microphoneBounceAnimation()
+            loopMicroPhoneAnimation()
+        }, MIC_ANIMATION_DELAY)
     }
 
     private fun bindSuggestion(viewGroup: ViewGroup, suggestion: ResponseSuggestion) {
@@ -653,9 +644,9 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     private fun showSuggestion(
         textToSpeak: String,
         suggestionViewGroup: View,
-        transitionEndListener: TransitionEndListener?
+        delay: Long = 0L
     ) {
-        handler.post {
+        handler.postDelayed({
             TransitionManager.go(Scene(bottom_container), Slide()
                 .apply {
                     addTarget(suggestionViewGroup)
@@ -665,22 +656,15 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                         override fun onTransitionFinished(transition: Transition) {
                             if (switch_auto_play.isChecked) {
                                 handler.postDelayed({
-                                    speak(textToSpeak, speakEndListener = object : EndTextToSpeechCallback() {
-                                        override fun onCompleted() {
-                                            transitionEndListener?.let { it.onTransitionFinished(transition) }
-                                        }
-
-                                    })
+                                    speak(textToSpeak)
                                 }, OPTION_SPEAK_DELAY)
-                            } else {
-                                transitionEndListener?.let { it.onTransitionFinished(transition) }
                             }
                         }
 
                     })
                 })
             suggestionViewGroup.isInvisible = false
-        }
+        }, delay)
     }
 
     private fun cancelMicLooper() {

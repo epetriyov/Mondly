@@ -33,7 +33,7 @@ import kotlinx.android.synthetic.main.adt_chat_user_message.*
 private const val ITEM_SLIDE_DURATION = 250L
 private const val ALPHA_SLIDE_DURATION = 500L
 private const val TEXT_SCALE_DURATION = 250L
-private const val TEXT_SCALE_FACTOR = 1.3F
+private const val TEXT_SCALE_FACTOR = 1.02F
 private const val DELAY_FOR_FIXING_OVERLAPPING_WITH_PROGRESS = 300L
 
 internal class ChatAdapter(
