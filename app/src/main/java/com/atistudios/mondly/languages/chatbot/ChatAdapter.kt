@@ -100,11 +100,14 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
         BaseViewHolder(containerView), AnimateViewHolder {
 
         override fun preAnimateAddImpl(holder: RecyclerView.ViewHolder) {
-            itemView.alpha = 0F
+            holder.itemView.alpha = 0F
             img_constraint.translationX = -img_constraint.width.toFloat()
         }
 
-        override fun preAnimateRemoveImpl(holder: RecyclerView.ViewHolder?) {}
+        override fun preAnimateRemoveImpl(holder: RecyclerView.ViewHolder) {
+            holder.itemView.alpha = 1F
+            img_constraint.translationX = 0F
+        }
 
         override fun animateAddImpl(holder: RecyclerView.ViewHolder, listener: ViewPropertyAnimatorListener?) {
             val translationAnimator = ObjectAnimator.ofFloat(
@@ -193,7 +196,9 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
             holder.itemView.alpha = 0F
         }
 
-        override fun preAnimateRemoveImpl(holder: RecyclerView.ViewHolder?) {}
+        override fun preAnimateRemoveImpl(holder: RecyclerView.ViewHolder) {
+            holder.itemView.alpha = 1F
+        }
 
         override fun animateAddImpl(holder: RecyclerView.ViewHolder, listener: ViewPropertyAnimatorListener?) {
             ViewCompat.animate(holder.itemView)

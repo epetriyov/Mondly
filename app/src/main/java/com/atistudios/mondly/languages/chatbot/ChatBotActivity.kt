@@ -148,7 +148,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             hideKeyboard(edit_answer)
             handler.postDelayed(
                 {
-                    loopMicAnimation = false
+                    cancelMicLooper()
                     setControlsEnabled(false)
                     chatEngine.onUserAnswered(edit_answer.text.toString(), true)
                     edit_answer.text = null
@@ -246,7 +246,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
             TransitionManager.beginDelayedTransition(
                 bottom_container, AutoTransition().addListener(
                     object : TransitionEndListener() {
-                        override fun onTransitionEnd(transition: Transition?) {
+                        override fun onTransitionFinished(transition: Transition) {
                             showSuggestions(suggestions)
                         }
                     })
@@ -513,8 +513,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
     }
 
     private fun speakStarted() {
-        loopMicAnimation = false
-        handler.removeCallbacks(loopMicroRunner)
+        cancelMicLooper()
         handler.post {
             TransitionManager.go(Scene(bottom_container), AutoTransition()
                 .apply {
@@ -593,15 +592,15 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         bindSuggestion(third_suggestion as ViewGroup, suggestions.third)
         showSuggestion(suggestions.first.text, first_suggestion,
             object : TransitionEndListener() {
-                override fun onTransitionEnd(transition: Transition) {
+                override fun onTransitionFinished(transition: Transition) {
                     showSuggestion(suggestions.second.text, second_suggestion,
                         object : TransitionEndListener() {
-                            override fun onTransitionEnd(transition: Transition) {
+                            override fun onTransitionFinished(transition: Transition) {
                                 showSuggestion(
                                     suggestions.third.text,
                                     third_suggestion,
                                     object : TransitionEndListener() {
-                                        override fun onTransitionEnd(transition: Transition?) {
+                                        override fun onTransitionFinished(transition: Transition) {
                                             TransitionManager.beginDelayedTransition(bottom_container)
                                             setControlsEnabled(true)
                                             handler.postDelayed({
@@ -663,18 +662,18 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                     duration = OPTION_SLIDE_DURATION
                     slideEdge = Gravity.START
                     addListener(object : TransitionEndListener() {
-                        override fun onTransitionEnd(transition: Transition?) {
+                        override fun onTransitionFinished(transition: Transition) {
                             if (switch_auto_play.isChecked) {
                                 handler.postDelayed({
                                     speak(textToSpeak, speakEndListener = object : EndTextToSpeechCallback() {
                                         override fun onCompleted() {
-                                            transitionEndListener?.let { it.onTransitionEnd(transition) }
+                                            transitionEndListener?.let { it.onTransitionFinished(transition) }
                                         }
 
                                     })
                                 }, OPTION_SPEAK_DELAY)
                             } else {
-                                transitionEndListener?.let { it.onTransitionEnd(transition) }
+                                transitionEndListener?.let { it.onTransitionFinished(transition) }
                             }
                         }
 
@@ -682,6 +681,11 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
                 })
             suggestionViewGroup.isInvisible = false
         }
+    }
+
+    private fun cancelMicLooper() {
+        loopMicAnimation = false
+        handler.removeCallbacks(loopMicroRunner)
     }
 
     private fun loopMicroPhoneAnimation() {

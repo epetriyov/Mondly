@@ -1,10 +1,12 @@
 package com.atistudios.mondly.languages.chatbot.keyboard
 
+import android.annotation.TargetApi
 import android.app.Activity
 import android.content.res.Configuration
 import android.graphics.Point
 import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
+import android.os.Build
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -106,6 +108,28 @@ class KeyboardHeightProvider
         this.observer = observer
     }
 
+    @TargetApi(android.os.Build.VERSION_CODES.P)
+    private fun getTopCutoutHeight(): Int {
+        val decorView = activity.window.decorView ?: return 0
+        var cutOffHeight = 0
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            val windowInsets = decorView.rootWindowInsets
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                val displayCutout = windowInsets.displayCutout
+                if (displayCutout != null) {
+                    val list = displayCutout.boundingRects
+                    for (rect in list) {
+                        if (rect.top == 0) {
+                            cutOffHeight += rect.bottom - rect.top
+                        }
+                    }
+                }
+            }
+
+        }
+        return cutOffHeight
+    }
+
     /**
      * Popup window itself is as big as the window of the Activity.
      * The keyboard can then be calculated by extracting the popup view bottom
@@ -123,7 +147,11 @@ class KeyboardHeightProvider
         // and also using the status bar and navigation bar heights of the phone to calculate
         // the keyboard height. But this worked fine on a Nexus.
         val orientation = screenOrientation
-        val keyboardHeight = screenSize.y - rect.bottom
+        var topCutoutHeight = 0
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            topCutoutHeight = getTopCutoutHeight()
+        }
+        val keyboardHeight = screenSize.y + topCutoutHeight - rect.bottom
 
         if (keyboardHeight == 0) {
             notifyKeyboardHeightChanged(0, orientation)
