@@ -32,6 +32,7 @@ import kotlinx.android.synthetic.main.adt_chat_user_message.*
 
 
 private const val ITEM_SLIDE_DURATION = 250L
+private const val ALPHA_SLIDE_DURATION = 500L
 private const val TEXT_SCALE_DURATION = 250L
 private const val TEXT_SCALE_FACTOR = 1.3F
 
@@ -120,7 +121,7 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
                 }
             val alphaAnimator = ObjectAnimator.ofFloat(itemView, "alpha", 0F, 1F)
                 .apply {
-                    duration = ITEM_SLIDE_DURATION
+                    duration = ALPHA_SLIDE_DURATION
                 }
             AnimatorSet()
                 .apply {
@@ -210,7 +211,7 @@ internal sealed class BaseViewHolder(override val containerView: View) : Recycle
         override fun animateAddImpl(holder: RecyclerView.ViewHolder, listener: ViewPropertyAnimatorListener?) {
             ViewCompat.animate(holder.itemView)
                 .alpha(1F)
-                .setDuration(ITEM_SLIDE_DURATION)
+                .setDuration(ALPHA_SLIDE_DURATION)
                 .setListener(listener)
         }
 
