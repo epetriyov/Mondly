@@ -55,12 +55,18 @@ internal class ChatAdapter(
         BOT_MESSAGE_TYPE, USER_MESSAGE_TYPE, FOOTER_TYPE
     }
 
+    private var enableSpeak = true
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
         return when (ItemViewType.values()[viewType]) {
             ItemViewType.BOT_MESSAGE_TYPE -> BaseViewHolder.BotMessageViewHolder(
                 layoutInflater.inflate(R.layout.adt_chat_bot_message, parent, false)
-            ) { message, rate -> botMessageClickListener?.invoke(message, rate) }
+            ) { message, rate ->
+                if (enableSpeak) {
+                    botMessageClickListener?.invoke(message, rate)
+                }
+            }
             ItemViewType.USER_MESSAGE_TYPE -> BaseViewHolder.UserMessageViewHolder(
                 layoutInflater.inflate(R.layout.adt_chat_user_message, parent, false)
             )
@@ -88,6 +94,14 @@ internal class ChatAdapter(
             }
             is BaseViewHolder.FooterViewHolder -> holder.bindView(getItem(position) as ChatMessage.Footer)
         }
+    }
+
+    fun enableSpeak() {
+        enableSpeak = true
+    }
+
+    fun disableSpeak() {
+        enableSpeak = false
     }
 }
 

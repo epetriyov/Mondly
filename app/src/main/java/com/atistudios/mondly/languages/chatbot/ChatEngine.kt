@@ -88,6 +88,7 @@ internal class ChatEngineImpl(
         handler.postDelayed({
             chatListHelper.updateLastItem(botMessage.copy(isLoading = false))
             if (isAutoPlayEnabled) {
+                chatView.disableSpeak()
                 botMessage.text?.let {
                     chatView.speak(it, speakEndListener = object : EndTextToSpeechCallback() {
                         override fun onCompleted() {

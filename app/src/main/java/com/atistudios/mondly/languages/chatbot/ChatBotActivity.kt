@@ -54,6 +54,8 @@ interface ChatView {
     fun progressStateChanged(isLoading: Boolean)
 
     fun speak(message: String, speakRate: Float? = null, speakEndListener: EndTextToSpeechCallback? = null)
+
+    fun disableSpeak()
 }
 
 class ChatBotActivity : AppCompatActivity(), ChatView {
@@ -238,6 +240,11 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         }
     }
 
+    override fun disableSpeak() {
+        chatAdapter.disableSpeak()
+    }
+
+
     override fun chatUpdated(messages: List<ChatMessage>) {
         chatAdapter.submitList(messages)
     }
@@ -246,6 +253,7 @@ class ChatBotActivity : AppCompatActivity(), ChatView {
         suggestions: Triple<ResponseSuggestion, ResponseSuggestion, ResponseSuggestion>,
         introAnimations: Boolean
     ) {
+        chatAdapter.enableSpeak()
         if (introAnimations) {
             TransitionManager.beginDelayedTransition(
                 bottom_container, AutoTransition().addListener(
